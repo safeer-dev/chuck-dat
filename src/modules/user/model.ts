@@ -112,11 +112,33 @@ const userSchema = new Schema(
       type: Date,
       select: false,
     },
-    profile: {
+    admin: {
       type: Schema.Types.ObjectId,
-      ref: "profiles",
+      ref: "admins",
       select: false,
       index: true,
+    },
+    chucker: {
+      type: Schema.Types.ObjectId,
+      ref: "chuckers",
+      select: false,
+      index: true,
+    },
+    isChucker: {
+      type: Boolean,
+      select: false,
+      default: false,
+    },
+    customer: {
+      type: Schema.Types.ObjectId,
+      ref: "customers",
+      select: false,
+      index: true,
+    },
+    isCustomer: {
+      type: Boolean,
+      select: false,
+      default: false,
     },
     isAdmin: {
       type: Boolean,
@@ -138,13 +160,13 @@ const userSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 userSchema.methods.getSignedjwtToken = function () {
   return jwt.sign(
     { _id: this._id, type: this.type },
-    process.env.JWT_SECRET || ""
+    process.env.JWT_SECRET || "",
   );
 };
 

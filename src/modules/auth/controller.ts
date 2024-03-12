@@ -2,7 +2,9 @@
 import NodeMailer from "../../utils/node-mailer";
 import * as userController from "../user/controller";
 import * as userTokenController from "../user-token/controller";
-import * as profileController from "../profile/controller";
+import * as customerController from "../customer/controller";
+import * as chuckerController from "../chucker/controller";
+import * as adminController from "../admin/controller";
 import { Element as User } from "../user/interface";
 import { USER_TYPES, USER_STATUSES } from "../../configs/enum";
 import { ErrorHandler } from "../../middlewares/error-handler";
@@ -15,7 +17,7 @@ import {
 } from "./dto";
 
 // destructuring assignments
-const { CUSTOMER, ADMIN } = USER_TYPES;
+const { CUSTOMER, ADMIN, CHUCKER } = USER_TYPES;
 const { ACTIVE } = USER_STATUSES;
 const {
   sendEmail,
@@ -37,10 +39,15 @@ export const register = async (params: User) => {
   const userObj: any = {};
   userObj.type = type;
 
-  if (type === CUSTOMER)
-    userObj.profile = (await profileController.addElement(profileObj))._id;
-  else if (type === ADMIN) userObj.isAdmin = true;
-
+  if (type === CUSTOMER) {
+    userObj.customer = (await customerController.addElement(profileObj))._id;
+    // emailVerifyEmail(user.email);
+  } else if (type === ADMIN) {
+    userObj.admin = (await adminController.addElement(profileObj))._id;
+  } else if (type === CHUCKER) {
+    userObj.chucker = (await chuckerController.addElement(profileObj))._id;
+    // emailVerifyEmail(user.email);
+  }
   await userController.updateElementById(user._id, userObj);
 
   return user.getSignedjwtToken();
@@ -72,7 +79,7 @@ export const login = async (params: LoginDTO) => {
 
   await userController.updateElement(
     { _id: userExists._id },
-    { lastLogin: new Date() }
+    { lastLogin: new Date() },
   );
 
   return userExists.getSignedjwtToken();
@@ -105,6 +112,7 @@ export const emailResetPassword = async (params: SendEmailDTO) => {
  */
 export const emailVerifyEmail = async (params: SendEmailDTO) => {
   const { email } = params;
+  console.log("i m in verify email ", email);
   const tokenExpirationTime = new Date();
   tokenExpirationTime.setMinutes(tokenExpirationTime.getMinutes() + 10);
   const { user, token } = await generateEmailToken({
@@ -139,6 +147,7 @@ export const emailWelcomeUser = async (params: SendEmailDTO) => {
  */
 export const generateEmailToken = async (params: GenerateEmailTokenDTO) => {
   const { email, tokenExpirationTime } = params;
+  console.log("i m in token email generation", email);
   const userExists: any = await userController.getElement({ email });
   if (!userExists)
     throw new ErrorHandler("User with given email doesn't exist!", 404);
@@ -161,7 +170,7 @@ export const generateEmailToken = async (params: GenerateEmailTokenDTO) => {
  * @param {Object} params user password reset data
  */
 export const resetPassword = async (
-  params: ResetPasswordDTO
+  params: ResetPasswordDTO,
 ): Promise<void> => {
   const { password, user, token } = params;
 
@@ -182,9 +191,7 @@ export const resetPassword = async (
  * @description Email user email
  * @param {Object} params user email verification data
  */
-export const verifyUserEmail = async (
-  params: VerifyUserEmailDTO
-): Promise<void> => {
+export const verifyUserEmail = async (params: VerifyUserEmailDTO) => {
   const { user, token } = params;
 
   const userExists = await userController.getElementById(user);
@@ -199,4 +206,5 @@ export const verifyUserEmail = async (
   userExists.isEmailVerified = true;
   await userExists.save();
   await userTokenExists.deleteOne();
+  return { message: "verified sucessfully" };
 };

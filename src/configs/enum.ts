@@ -7,7 +7,7 @@ export enum USER_TYPES {
   CUSTOMER = "customer",
   ADMIN = "admin",
   SUPER_ADMIN = "super_admin",
-  MULTI = "multi",
+  CHUCKER = "chucker",
 }
 
 export enum GEO_JSON_TYPES {
@@ -54,4 +54,18 @@ export enum NOTIFICATION_STATUSES {
 export enum SOCKET_EVENTS {
   NEW_MESSAGE_ = "new_message_",
   CONVERSATIONS_UPDATED = "conversations_updated",
+}
+
+export enum EXTRA_CHARGES_REQUEST_STATUS {
+  PENDING = "pending",
+  CONFRIMED = "confirmed",
+  REJECTED = "rejected",
+}
+
+export enum SERVICE_ORDER_STATUS {
+  IN_PROGRESS = "in_progress",
+  PENDING = "pending",
+  CONFRIMED = "confirmed",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
 }

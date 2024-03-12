@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 const model = mongoose.model;
 
-const customerSchema = new Schema(
+const customersSchema = new Schema(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -19,4 +19,4 @@ const customerSchema = new Schema(
   },
 );
 
-export default model("profiles", customerSchema);
+export default model("customers", customersSchema);

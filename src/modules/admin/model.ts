@@ -19,4 +19,4 @@ const customerSchema = new Schema(
   },
 );
 
-export default model("profiles", customerSchema);
+export default model("admin", customerSchema);

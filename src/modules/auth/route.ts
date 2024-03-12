@@ -16,7 +16,7 @@ import {
 import { IRequest } from "../../configs/types";
 
 // destructuring assignments
-const { ADMIN, CUSTOMER } = USER_TYPES;
+const { ADMIN, CUSTOMER, CHUCKER } = USER_TYPES;
 
 // variable initializations
 const router = express.Router();
@@ -27,8 +27,9 @@ router.post(
     const { email, password, name } = req.body;
     const args = { email, password, name, type: CUSTOMER };
     const response = await authController.register(args);
-    res.json({ token: response });
-  })
+    const Email = await authController.emailVerifyEmail({ email: email });
+    res.json({ token: response, Email });
+  }),
 );
 
 router.post(
@@ -38,7 +39,7 @@ router.post(
     const args = { email, password, type: CUSTOMER };
     const response = await authController.login(args);
     res.json({ token: response });
-  })
+  }),
 );
 
 router.post(
@@ -51,7 +52,7 @@ router.post(
     const args = { user, device, shallRemoveFCM: true };
     await userController.updateElementById(user, args);
     res.json({ message: "Operation completed successfully!" });
-  })
+  }),
 );
 
 router
@@ -62,7 +63,7 @@ router
       const args = { email };
       await authController.emailResetPassword(args);
       res.json({ message: "Operation completed successfully!" });
-    })
+    }),
   )
   .put(
     exceptionHandler(async (req: Request, res: Response) => {
@@ -70,7 +71,7 @@ router
       const args = { password, user, token };
       await authController.resetPassword(args);
       res.json({ message: "Operation completed successfully!" });
-    })
+    }),
   );
 
 router.post(
@@ -83,7 +84,7 @@ router.post(
     const args = { user };
     const response: any = await userController.getElement(args);
     res.json({ token: response.getSignedjwtToken() });
-  })
+  }),
 );
 
 router.post(
@@ -93,7 +94,7 @@ router.post(
     const args = { googleId };
     const response: any = await userController.getElement(args);
     res.json({ token: response.getSignedjwtToken() });
-  })
+  }),
 );
 
 router.post(
@@ -103,7 +104,7 @@ router.post(
     const args = { facebookId };
     const response: any = await userController.getElement(args);
     res.json({ token: response.getSignedjwtToken() });
-  })
+  }),
 );
 
 router.post(
@@ -113,7 +114,7 @@ router.post(
     const args = { email, password, type: ADMIN };
     const response = await authController.login(args);
     res.json({ token: response });
-  })
+  }),
 );
 
 router.post(
@@ -124,7 +125,38 @@ router.post(
     const args = { email, password, type: type ?? ADMIN, name: type };
     const response = await authController.register(args);
     res.json({ token: response });
-  })
+  }),
+);
+
+router.post(
+  "/register/chucker",
+  exceptionHandler(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const args = { email, password, type: CHUCKER };
+    const response = await authController.register(args);
+    const Email = await authController.emailVerifyEmail({ email: email });
+    res.json({ token: response, Email });
+  }),
+);
+router.post(
+  "/login/chucker",
+  exceptionHandler(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const args = { email, password, type: CHUCKER };
+    const response = await authController.login(args);
+    res.json({ token: response });
+  }),
+);
+
+router.post(
+  "/verify-email",
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { user, token } = req.query;
+    const args = { user: String(user), token: String(token) };
+
+    const response = await authController.verifyUserEmail(args);
+    res.json({ response });
+  }),
 );
 
 export default router;
