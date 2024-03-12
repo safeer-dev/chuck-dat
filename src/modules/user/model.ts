@@ -45,7 +45,6 @@ const userSchema = new Schema(
     phone: {
       type: String,
       trim: true,
-      index: true,
     },
     firstName: {
       type: String,
@@ -157,6 +156,11 @@ const userSchema = new Schema(
       type: String,
       select: false,
     },
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    country: { type: String },
+    zipCode: { type: String },
   },
   {
     timestamps: true,

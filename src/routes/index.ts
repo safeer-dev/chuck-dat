@@ -8,6 +8,7 @@ import element from "../modules/element/route";
 import message from "../modules/message/route";
 import user from "../modules/user/route";
 import service from "../modules/service/route";
+import chucker from "../modules/chucker/route";
 
 // destructuring assignments
 const { POSTMAN_URL } = process.env;
@@ -21,6 +22,7 @@ router.use("/element", element);
 router.use("/message", message);
 router.use("/user", user);
 router.use("/service", service);
+router.use("/chucker", chucker);
 
 router.use("/docs", (_req: Request, res: Response) =>
   res.redirect(POSTMAN_URL || ""),

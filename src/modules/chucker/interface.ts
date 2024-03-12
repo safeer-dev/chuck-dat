@@ -3,6 +3,9 @@ export interface Element {
   user: any;
   firstName: string;
   lastName: string;
-  phone: number;
-  services: any;
+  phone: string;
+  faceImage: string;
+  drivingLicense: string;
+  idCard: string;
+  equipmentMedia: any;
 }

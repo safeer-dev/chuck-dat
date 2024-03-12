@@ -39,7 +39,7 @@ export const addElement = async (elementObj: Element) => {
  */
 export const updateElementById = async (
   user: MongoID,
-  userObj: updateUserDTO
+  userObj: updateUserDTO,
 ) => {
   if (!user) throw new ErrorHandler("Please enter user id!", 400);
   if (!isValidObjectId(user))
@@ -84,7 +84,7 @@ export const updateElementById = async (
   if (shallRemoveFCM)
     if (device)
       userExists.fcms = userExists.fcms.filter(
-        (element: any) => element?.device !== device
+        (element: any) => element?.device !== device,
       );
   if (firstName || lastName)
     userExists.name = (firstName || "") + " " + (lastName || "");
@@ -98,7 +98,7 @@ export const updateElementById = async (
     else
       throw new ErrorHandler(
         "Please enter location longitude and latitude both!",
-        400
+        400,
       );
   }
   if (profile)
@@ -112,7 +112,7 @@ export const updateElementById = async (
     userExists,
     {
       new: true,
-    }
+    },
   ).select("-createdAt -updatedAt -__v");
   if (!userExists) throw new ErrorHandler("user not found!", 404);
   return userExists;
@@ -126,7 +126,7 @@ export const updateElementById = async (
  */
 export const updateElement = async (
   query: Partial<Element>,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler("Please enter query!", 400);
@@ -161,7 +161,7 @@ export const getElementById = async (element: MongoID) => {
   if (!isValidObjectId(element))
     throw new ErrorHandler("Please enter valid element id!", 400);
   const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
@@ -183,7 +183,7 @@ export const getElement = async (params: getUserDTO) => {
   if (Object.keys(query).length === 0) query._id = null;
 
   let userExists = await ElementModel.findOne(query).select(
-    "-createdAt -updatedAt -__v -fcms"
+    "-createdAt -updatedAt -__v -fcms",
   );
   if (userExists) userExists = await userExists.populate(userExists.type);
   return userExists;
@@ -253,11 +253,27 @@ export const checkElementExistence = async (query: Partial<Element>) => {
 export const getUserProfile = async (params: getUserProfileDTO) => {
   const { user, device } = params;
   const userExists: any = await ElementModel.findById(user).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   userExists.fcms.forEach((element: any) => {
     if (element?.device === device) userExists._doc.fcm = element?.token;
   });
   delete userExists._doc.fcms;
   return userExists;
+};
+
+export const updatechuckerById = async (
+  element: string,
+  elementObj: Partial<Element>,
+) => {
+  if (!element) throw new Error("Please enter element id!|||400");
+  if (!isValidObjectId(element))
+    throw new Error("Please enter valid element id ||| 400");
+  const elementExists = await ElementModel.findOneAndUpdate(
+    { chucker: element },
+    elementObj,
+    { new: true },
+  );
+  if (!elementExists) throw new Error("element not found ||| 404");
+  return elementExists;
 };

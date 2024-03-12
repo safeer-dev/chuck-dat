@@ -20,6 +20,31 @@ export const addElement = async (elementObj: Element) => {
 };
 
 /**
+ * @description Add element
+ * @param {Object} elementObj element data
+ * @returns {Object} element data
+ */
+export const addServices = async (params: any) => {
+  const { services, chucker } = params;
+  for (const service of services) {
+    let existingService = await ElementModel.findOne({
+      chucker: chucker,
+      service: service.serviceId,
+    });
+    if (!existingService) {
+      const newService = new ElementModel({
+        chucker: chucker,
+        service: service.serviceId,
+        experience: service.experience,
+      });
+      await newService.save();
+    } else {
+      console.log("Service already exists, not creating a new one.");
+    }
+  }
+};
+
+/**
  * @description Update element data
  * @param {String} element element id
  * @param {Object} elementObj element data

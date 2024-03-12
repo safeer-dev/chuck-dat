@@ -3,6 +3,8 @@ import express, { Request, Response } from "express";
 
 // file imports
 import * as elementController from "./controller";
+import * as chuckerServiceController from "../chucker-service/controller";
+import * as userController from "../user/controller";
 import { exceptionHandler } from "../../middlewares/exception-handler";
 import {
   verifyToken,
@@ -34,8 +36,8 @@ router.get(
 );
 
 router
-  .route("/admin")
-  .all(verifyToken, verifyAdmin)
+  .route("/complete-profile")
+  .all(verifyToken, verifyUser)
   // .post(
   //   exceptionHandler(async (req: Request, res: Response) => {
   //     const { title } = req.body;
@@ -48,10 +50,24 @@ router
     exceptionHandler(async (req: Request, res: Response) => {
       let { element } = req.query;
       const { firstName, lastName, phone, services } = req.body;
-      const args = { firstName, lastName, phone, services };
+
+      const args = {
+        firstName,
+        lastName,
+        phone,
+      };
+
       element = element?.toString() || "";
-      const response = await elementController.updateElementById(element, args);
-      res.json(response);
+      const responseUser = await userController.updatechuckerById(
+        element,
+        args,
+      );
+      const argsSerivce = { chucker: element, services };
+      const chuckerServices = await chuckerServiceController.addServices(
+        argsSerivce,
+      );
+
+      res.json({ chuckerServices, responseUser });
     }),
   )
   .get(
@@ -88,4 +104,29 @@ router.get(
   }),
 );
 
+router.get(
+  "/upload-pictures",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { faceImage, equipmentMedia, image } = req.body;
+    element = element?.toString() || "";
+
+    const args = { faceImage, equipmentMedia, image };
+    const response = await elementController.updateElementById(element, args);
+    const updateUser = await userController.updatechuckerById(element, args);
+
+    res.json(response);
+  }),
+);
+
 export default router;
+
+// const promises = hashtags.map(async (tag: any) => {
+//   const arga = { post: response._id, hashtag: tag };
+//   const hashTag = await hashtagcontroller.addElement(arga);
+//   return hashTag;
+// });
+
+// const results = await Promise.all(promises);

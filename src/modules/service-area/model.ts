@@ -14,13 +14,7 @@ const elementSchema = new Schema(
       required: true,
       index: true,
     },
-    service: {
-      type: Schema.Types.ObjectId,
-      ref: "services",
-      required: true,
-      index: true,
-    },
-    zipCode: { type: Number },
+    zipCodes: [{ type: Number }],
     location: {
       type: {
         type: String,
@@ -33,6 +27,7 @@ const elementSchema = new Schema(
         default: [0, 0],
         required: true,
       },
+      radius: { type: Number },
     },
   },
   { timestamps: true },
