@@ -7,6 +7,7 @@ import auth from "../modules/auth/route";
 import element from "../modules/element/route";
 import message from "../modules/message/route";
 import user from "../modules/user/route";
+import service from "../modules/service/route";
 
 // destructuring assignments
 const { POSTMAN_URL } = process.env;
@@ -19,9 +20,10 @@ router.use("/auth", auth);
 router.use("/element", element);
 router.use("/message", message);
 router.use("/user", user);
+router.use("/service", service);
 
 router.use("/docs", (_req: Request, res: Response) =>
-  res.redirect(POSTMAN_URL || "")
+  res.redirect(POSTMAN_URL || ""),
 );
 
 export default router;

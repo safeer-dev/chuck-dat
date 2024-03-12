@@ -44,16 +44,16 @@ router
   //     res.json(response);
   //   })
   // )
-  // .put(
-  //   exceptionHandler(async (req: Request, res: Response) => {
-  //     let { element } = req.query;
-  //     const { title } = req.body;
-  //     const args = { title };
-  //     element = element?.toString() || "";
-  //     const response = await elementController.updateElementById(element, args);
-  //     res.json(response);
-  //   }),
-  // )
+  .put(
+    exceptionHandler(async (req: Request, res: Response) => {
+      let { element } = req.query;
+      const { firstName, lastName, phone, services } = req.body;
+      const args = { firstName, lastName, phone, services };
+      element = element?.toString() || "";
+      const response = await elementController.updateElementById(element, args);
+      res.json(response);
+    }),
+  )
   .get(
     exceptionHandler(async (req: Request, res: Response) => {
       const { page, limit } = req.query;

@@ -19,6 +19,10 @@ const elementSchema = new Schema(
       required: true,
       index: true,
     },
+    experience: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true },
 );

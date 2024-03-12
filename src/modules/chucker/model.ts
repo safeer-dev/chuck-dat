@@ -40,14 +40,6 @@ const serviceProviderSchema = new Schema(
       select: false,
       // required: true,
     },
-    services: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "services",
-        required: true,
-        index: true,
-      },
-    ],
   },
   {
     timestamps: true,
