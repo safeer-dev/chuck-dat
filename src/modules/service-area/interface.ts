@@ -1,4 +1,6 @@
 export interface Element {
-  _id?: string;
-  title: string;
+  chucker: string;
+  location: any;
+  zipCodes: any;
+  radius: number;
 }

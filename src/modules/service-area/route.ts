@@ -30,30 +30,30 @@ router.get(
     };
     const response = await elementController.getElements(args);
     res.json(response);
-  })
+  }),
 );
 
 router
   .route("/admin")
   .all(verifyToken, verifyAdmin)
-  .post(
-    exceptionHandler(async (req: Request, res: Response) => {
-      const { title } = req.body;
-      const args = { title };
-      const response = await elementController.addElement(args);
-      res.json(response);
-    })
-  )
-  .put(
-    exceptionHandler(async (req: Request, res: Response) => {
-      let { element } = req.query;
-      const { title } = req.body;
-      const args = { title };
-      element = element?.toString() || "";
-      const response = await elementController.updateElementById(element, args);
-      res.json(response);
-    })
-  )
+  // .post(
+  //   exceptionHandler(async (req: Request, res: Response) => {
+  //     const { title } = req.body;
+  //     const args = { title };
+  //     const response = await elementController.addElement(args);
+  //     res.json(response);
+  //   })
+  // )
+  // .put(
+  //   exceptionHandler(async (req: Request, res: Response) => {
+  //     let { element } = req.query;
+  //     const { title } = req.body;
+  //     const args = { title };
+  //     element = element?.toString() || "";
+  //     const response = await elementController.updateElementById(element, args);
+  //     res.json(response);
+  //   })
+  // )
   .get(
     exceptionHandler(async (req: Request, res: Response) => {
       const { page, limit } = req.query;
@@ -66,7 +66,7 @@ router
       };
       const response = await elementController.getElements(args);
       res.json(response);
-    })
+    }),
   )
   .delete(
     exceptionHandler(async (req: Request, res: Response) => {
@@ -74,7 +74,7 @@ router
       element = element?.toString() || "";
       const response = await elementController.deleteElementById(element);
       res.json(response);
-    })
+    }),
   );
 
 router.get(
@@ -85,7 +85,7 @@ router.get(
     const { element } = req.params;
     const response = await elementController.getElementById(element);
     res.json(response);
-  })
+  }),
 );
 
 export default router;

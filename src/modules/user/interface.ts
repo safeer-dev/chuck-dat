@@ -21,4 +21,10 @@ export interface Element {
   facebookId?: string;
   lastLogin?: Date;
   otp?: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+  coordinates?: number[];
 }

@@ -15,7 +15,7 @@ const elementSchema = new Schema(
       required: true,
       index: true,
     },
-    srtreet: { type: String },
+    street: { type: String },
     city: { type: String },
     state: { type: String },
     country: { type: String },
@@ -37,4 +37,4 @@ const elementSchema = new Schema(
   { timestamps: true },
 );
 
-export default model("locations", elementSchema);
+export default model("customer-locations", elementSchema);

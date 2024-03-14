@@ -1,11 +1,11 @@
 export interface Element {
   _id?: string;
-  user: any;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  faceImage: string;
-  drivingLicense: string;
-  idCard: string;
-  equipmentMedia: any;
+  user?: any;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  faceImage?: string;
+  drivingLicense?: string;
+  idCard?: string;
+  equipmentMedia?: any;
 }
