@@ -5,13 +5,16 @@ import express, { Request, Response } from "express";
 import * as elementController from "./controller";
 import * as chuckerServiceController from "../chucker-service/controller";
 import * as userController from "../user/controller";
+import * as serviceAreaController from "../service-area/controller";
 import { exceptionHandler } from "../../middlewares/exception-handler";
 import {
   verifyToken,
   verifyAdmin,
   verifyUser,
 } from "../../middlewares/authenticator";
-
+import { PUBLIC_DIRECTORY } from "../../configs/directories";
+import { upload } from "../../middlewares/uploader";
+const uploadTemporary = upload(PUBLIC_DIRECTORY);
 // destructuring assignments
 
 // variable initializations
@@ -104,18 +107,150 @@ router.get(
   }),
 );
 
-router.get(
+router.put(
   "/upload-pictures",
+  verifyToken,
+  verifyUser,
+  // uploadTemporary.array("equipmentMedia", 20),
+  // uploadTemporary.single("image"),
+  // uploadTemporary.single("Media"),
+  // uploadTemporary.single("faceImage"),
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { faceImage, image, equipmentMedia } = req.body;
+    // const faceImage = req.file;
+    // const image = req.file;
+    // const equipmentMedia = req.file;
+    element = element?.toString() || "";
+    // let mediaPaths;
+    // if (equipmentMedia){
+    //     mediaPaths = equipmentMedia.map((file: any) => file.filename);
+    // }
+    const args = {
+      faceImage,
+      // : faceImage?.filename,
+      equipmentMedia,
+      // : equipmentMedia?.filename,
+      image,
+      // : image?.filename,
+    };
+    const response = await elementController.updateElementById(element, args);
+    const updateUser = await userController.updatechuckerById(element, args);
+
+    res.json({ response, updateUser });
+  }),
+);
+
+router.put(
+  "/upload-location",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
     let { element } = req.query;
-    const { faceImage, equipmentMedia, image } = req.body;
     element = element?.toString() || "";
 
-    const args = { faceImage, equipmentMedia, image };
+    const { street, city, state, country, zipCode, coordinates } = req.body;
+    const parsedCoordinates = JSON.parse(coordinates);
+    const location = {
+      type: "Point",
+      coordinates: parsedCoordinates,
+    };
+    if (
+      !parsedCoordinates ||
+      !Array.isArray(parsedCoordinates) ||
+      parsedCoordinates.length !== 2
+    ) {
+      throw new Error("Invalid coordinates provided.");
+    }
+
+    const args = { street, city, state, country, zipCode, location };
+    const response = await userController.updatechuckerById(element, args);
+    res.json(response);
+  }),
+);
+
+router.put(
+  "/upload-identity",
+  verifyToken,
+  verifyUser,
+  // uploadTemporary.single(" idCard"),
+  // uploadTemporary.single("drivingLicense"),
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { drivingLicense, idCard } = req.body;
+    // const drivingLicense = req.file;
+    // const idCard = req.file;
+
+    element = element?.toString() || "";
+    // let mediaPaths;
+    // if (equipmentMedia){
+    //     mediaPaths = equipmentMedia.map((file: any) => file.filename);
+    // }
+    const args = {
+      idCard,
+      drivingLicense,
+    };
     const response = await elementController.updateElementById(element, args);
-    const updateUser = await userController.updatechuckerById(element, args);
+
+    res.json(response);
+  }),
+);
+
+// router.put(
+//   "/upload-identity",
+//   verifyToken,
+//   verifyUser,
+//   // uploadTemporary.single(" idCard"),
+//   // uploadTemporary.single("drivingLicense"),
+//   exceptionHandler(async (req: Request, res: Response) => {
+//     let { element } = req.query;
+//     const { drivingLicense, idCard } = req.body;
+//     // const drivingLicense = req.file;
+//     // const idCard = req.file;
+
+//     element = element?.toString() || "";
+//     // let mediaPaths;
+//     // if (equipmentMedia){
+//         // mediaPaths = equipmentMedia.map((file: any) => file.filename);
+//     // }
+//     const args = {
+//       idCard,
+//       drivingLicense,
+//     };
+//     const response = await elementController.updateElementById(element, args);
+
+//     res.json(response);
+//   }),
+// );
+
+router.put(
+  "/upload-service-areas",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { zipCodes, coordinates, radius } = req.body;
+    element = element?.toString() || "";
+
+    const location = {
+      type: "Point",
+      coordinates: coordinates,
+    };
+    if (
+      !coordinates ||
+      !Array.isArray(coordinates) ||
+      coordinates.length !== 2
+    ) {
+      throw new Error("Invalid coordinates provided.");
+    }
+
+    const args = {
+      chucker: element,
+      zipCodes,
+      location,
+      radius,
+    };
+    const response = await serviceAreaController.addElement(args);
 
     res.json(response);
   }),
