@@ -8,6 +8,9 @@ import element from "../modules/element/route";
 import message from "../modules/message/route";
 import user from "../modules/user/route";
 import service from "../modules/service/route";
+import serviceRequest from "../modules/service-order-request/route";
+import serviceOffers from "../modules/service-order-offers/route";
+
 import subService from "../modules/sub-service/route";
 import chucker from "../modules/chucker/route";
 import customerLocation from "../modules/customer-location/route";
@@ -25,12 +28,12 @@ router.use("/message", message);
 router.use("/user", user);
 router.use("/service", service);
 router.use("/sub-service", subService);
+router.use("/service-request", serviceRequest);
+router.use("/service-offers", serviceOffers);
 
 router.use("/chucker", chucker);
 router.use("/customer-location", customerLocation);
 
-router.use("/docs", (_req: Request, res: Response) =>
-  res.redirect(POSTMAN_URL || ""),
-);
+router.use("/docs", (_req: Request, res: Response) => res.redirect(POSTMAN_URL || ""));
 
 export default router;

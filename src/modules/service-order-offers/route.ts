@@ -31,20 +31,17 @@ router.get(
 );
 
 router
-  .route("/customer")
+  .route("/user")
   .all(verifyToken, verifyUser)
   .post(
     exceptionHandler(async (req: IRequest, res: Response) => {
-      const { service, lotSize, subServices, location, image, notes } = req.body;
-      const customer = req.user._id;
+      const { serviceRequest, customer, date } = req.body;
+      const chucker = req.user._id;
       const args = {
-        service,
+        chucker,
+        serviceRequest,
         customer,
-        lotSize,
-        subServices,
-        location,
-        image,
-        notes,
+        date,
       };
       const response = await elementController.addElement(args);
       res.json(response);
@@ -53,14 +50,9 @@ router
   .put(
     exceptionHandler(async (req: Request, res: Response) => {
       let { element } = req.query;
-      const { service, lotSize, subServices, location, image, notes } = req.body;
+      const { date } = req.body;
       const args = {
-        service,
-        lotSize,
-        subServices,
-        location,
-        image,
-        notes,
+        date,
       };
       element = element?.toString() || "";
       const response = await elementController.updateElementById(element, args);
@@ -90,15 +82,15 @@ router
     }),
   );
 
-router.get(
-  "/:element",
-  verifyToken,
-  verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    const { element } = req.params;
-    const response = await elementController.getElementById(element);
-    res.json(response);
-  }),
-);
+// router.get(
+//   "/:element",
+//   verifyToken,
+//   verifyAdmin,
+//   exceptionHandler(async (req: Request, res: Response) => {
+//     const { element } = req.params;
+//     const response = await elementController.getElementById(element);
+//     res.json(response);
+//   }),
+// );
 
 export default router;

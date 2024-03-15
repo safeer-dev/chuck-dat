@@ -9,9 +9,9 @@ const Schema = mongoose.Schema;
 const model = mongoose.model;
 const elementSchema = new Schema(
   {
-    service: {
+    serviceRequest: {
       type: Schema.Types.ObjectId,
-      ref: "services",
+      ref: "service-order-requests",
       required: true,
       index: true,
     },
@@ -21,40 +21,23 @@ const elementSchema = new Schema(
       required: true,
       index: true,
     },
-    decliners: {
+    chucker: {
       type: Schema.Types.ObjectId,
       ref: "chuckers",
-
-      index: true,
-    },
-    lotSize: {
-      type: String,
-    },
-    notes: { type: String, required: true },
-    subServices: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "sub-services",
-      },
-    ],
-    location: {
-      type: Schema.Types.ObjectId,
-      ref: "locations",
       required: true,
       index: true,
     },
-    image: {
-      type: String,
+    date: {
+      type: Date,
       required: true,
     },
-
     status: {
       type: String,
       enum: Object.values(SERVICE_REQUEST_STATUS),
       default: PENDING,
       required: true,
     },
-    isAssigned: {
+    isDeclined: {
       type: Boolean,
       default: false,
       select: false,
@@ -65,4 +48,4 @@ const elementSchema = new Schema(
   { timestamps: true },
 );
 
-export default model("service-order-requests", elementSchema);
+export default model("service-order-offers", elementSchema);

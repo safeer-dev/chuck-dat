@@ -69,3 +69,9 @@ export enum SERVICE_ORDER_STATUS {
   COMPLETED = "completed",
   CANCELLED = "cancelled",
 }
+
+export enum SERVICE_REQUEST_STATUS {
+  PENDING = "pending",
+  CONFRIMED = "confirmed",
+  CANCELLED = "cancelled",
+}

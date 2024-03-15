@@ -1,10 +1,7 @@
 // module imports
 import mongoose from "mongoose";
 
-import {
-  SERVICE_ORDER_STATUS,
-  EXTRA_CHARGES_REQUEST_STATUS,
-} from "../../configs/enum";
+import { SERVICE_ORDER_STATUS, EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
 const { PENDING } = SERVICE_ORDER_STATUS;
 
 // variable initializations
@@ -15,6 +12,12 @@ const elementSchema = new Schema(
     service: {
       type: Schema.Types.ObjectId,
       ref: "services",
+      required: true,
+      index: true,
+    },
+    serviceRequest: {
+      type: Schema.Types.ObjectId,
+      ref: "service-order-requests",
       required: true,
       index: true,
     },
@@ -29,9 +32,6 @@ const elementSchema = new Schema(
       ref: "chuckers",
       required: true,
       index: true,
-    },
-    lotSize: {
-      type: String,
     },
     subServices: [
       {
@@ -50,7 +50,6 @@ const elementSchema = new Schema(
       type: String,
       required: true,
     },
-    notes: { type: String, required: true },
     extraCharges: {
       type: Number,
       default: 0,
