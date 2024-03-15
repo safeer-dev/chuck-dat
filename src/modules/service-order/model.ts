@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 
 import { SERVICE_ORDER_STATUS, EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
-const { PENDING } = SERVICE_ORDER_STATUS;
+const { CONFIRMED } = SERVICE_ORDER_STATUS;
 
 // variable initializations
 const Schema = mongoose.Schema;
@@ -43,16 +43,8 @@ const elementSchema = new Schema(
     location: {
       type: Schema.Types.ObjectId,
       ref: "locations",
-      required: true,
+
       index: true,
-    },
-    image: {
-      type: String,
-      required: true,
-    },
-    extraCharges: {
-      type: Number,
-      default: 0,
     },
     extraChargesRequested: {
       type: Boolean,
@@ -61,13 +53,12 @@ const elementSchema = new Schema(
     extraChargesStatus: {
       type: String,
       enum: Object.values(EXTRA_CHARGES_REQUEST_STATUS),
-      required: true,
     },
     totalPayment: { type: Number, required: true },
     status: {
       type: String,
       enum: Object.values(SERVICE_ORDER_STATUS),
-      default: PENDING,
+      default: CONFIRMED,
       required: true,
     },
     mediaBeforeWork: [

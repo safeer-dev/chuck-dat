@@ -27,20 +27,31 @@ export const addElement = async (elementObj: Element) => {
  */
 export const updateElementById = async (
   element: string,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
-  const elementExists = await ElementModel.findByIdAndUpdate(
-    element,
-    elementObj,
-    { new: true }
-  );
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
+  const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
+    new: true,
+  });
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
 };
 
+//accept service request
+export const updateServiceOffer = async (
+  serviceOffer: string,
+  elementObj: Partial<Element>,
+) => {
+  if (!serviceOffer) throw new Error("Please enter element id!|||400");
+  if (!isValidObjectId(serviceOffer))
+    throw new Error("Please enter valid element id!|||400");
+  const elementExists = await ElementModel.findByIdAndUpdate(serviceOffer, elementObj, {
+    new: true,
+  });
+  if (!elementExists) throw new Error("element not found!|||404");
+  return elementExists;
+};
 /**
  * @description Update element data
  * @param {Object} query element data
@@ -49,7 +60,7 @@ export const updateElementById = async (
  */
 export const updateElement = async (
   query: Partial<Element>,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!query || Object.keys(query).length === 0)
     throw new Error("Please enter query!|||400");
@@ -67,8 +78,7 @@ export const updateElement = async (
  */
 export const deleteElementById = async (element: string) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findByIdAndDelete(element);
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -94,10 +104,9 @@ export const deleteElement = async (query: Partial<Element>) => {
  */
 export const getElementById = async (element: string) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -112,7 +121,7 @@ export const getElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new Error("Please enter query!|||400");
   const elementExists = await ElementModel.findOne(query).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -124,18 +133,51 @@ export const getElement = async (query: Partial<Element>) => {
  * @returns {Object[]} elements data
  */
 export const getElements = async (params: GetElementsDTO) => {
-  let { limit, page } = params;
+  let { limit, page, customer } = params;
   page = page - 1 || 0;
   limit = limit || 10;
-  const query: any = {};
+  const query: any = { customer: customer };
   const [result] = await ElementModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
     {
+      $lookup: {
+        from: "users",
+        localField: "chucker",
+        foreignField: "_id",
+        as: "chuckerLookup",
+      },
+    },
+    { $unwind: { path: "$chuckerLookup", preserveNullAndEmptyArrays: true } },
+    {
+      $addFields: {
+        serviceName: "$chuckerLookup.name",
+        image: "$chuckerLookup.image",
+        firstName: "$chuckerLookup.firstName",
+        lastName: "$chuckerLookup.lastName",
+      },
+    },
+    {
       $facet: {
         totalCount: [{ $count: "totalCount" }],
-        data: [{ $skip: page * limit }, { $limit: limit }],
+        data: [
+          { $skip: page * limit },
+          { $limit: limit },
+          {
+            $project: {
+              firstName: 1,
+              lastName: 1,
+              image: 1,
+              //  ratings
+              date: 1,
+              customer: 1,
+              chucker: 1,
+              status: 1,
+              serviceRequest: 1,
+            },
+          },
+        ],
       },
     },
     { $unwind: "$totalCount" },

@@ -27,16 +27,13 @@ export const addElement = async (elementObj: Element) => {
  */
 export const updateElementById = async (
   element: string,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
-  const elementExists = await ElementModel.findByIdAndUpdate(
-    element,
-    elementObj,
-    { new: true }
-  );
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
+  const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
+    new: true,
+  });
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
 };
@@ -49,7 +46,7 @@ export const updateElementById = async (
  */
 export const updateElement = async (
   query: Partial<Element>,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!query || Object.keys(query).length === 0)
     throw new Error("Please enter query!|||400");
@@ -67,8 +64,7 @@ export const updateElement = async (
  */
 export const deleteElementById = async (element: string) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findByIdAndDelete(element);
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -92,12 +88,11 @@ export const deleteElement = async (query: Partial<Element>) => {
  * @param {String} element element id
  * @returns {Object} element data
  */
-export const getElementById = async (element: string) => {
+export const getElementById = async (element: any) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -112,7 +107,7 @@ export const getElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new Error("Please enter query!|||400");
   const elementExists = await ElementModel.findOne(query).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -133,9 +128,55 @@ export const getElements = async (params: GetElementsDTO) => {
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
     {
+      $lookup: {
+        from: "services",
+        localField: "service",
+        foreignField: "_id",
+        as: "serviceLookup",
+      },
+    },
+    { $unwind: { path: "$serviceLookup", preserveNullAndEmptyArrays: true } },
+    {
+      $addFields: {
+        serviceId: "$service",
+        serviceName: "$serviceLookup.name",
+        amount: "$serviceLookup.charges",
+      },
+    },
+    {
+      $lookup: {
+        from: "customer-locations",
+        localField: "location",
+        foreignField: "_id",
+        as: "address",
+      },
+    },
+    { $unwind: { path: "$address", preserveNullAndEmptyArrays: true } },
+
+    {
       $facet: {
         totalCount: [{ $count: "totalCount" }],
-        data: [{ $skip: page * limit }, { $limit: limit }],
+        data: [
+          { $skip: page * limit },
+          { $limit: limit },
+          {
+            $project: {
+              service: "$serviceId",
+              amount: 1,
+
+              serviceName: 1,
+              lotSize: 1,
+              notes: 1,
+              subServices: 1,
+              location: "$address",
+              image: 1,
+              status: 1,
+              isAssigned: 1,
+              name: 1,
+              customer: 1,
+            },
+          },
+        ],
       },
     },
     { $unwind: "$totalCount" },

@@ -4,7 +4,11 @@ import express, { Request, Response } from "express";
 // file imports
 import * as elementController from "./controller";
 import { exceptionHandler } from "../../middlewares/exception-handler";
-import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenticator";
+import {
+  verifyToken,
+  verifyAdmin,
+  verifyUser,
+} from "../../middlewares/authenticator";
 
 // destructuring assignments
 
@@ -26,7 +30,7 @@ router.get(
     };
     const response = await elementController.getElements(args);
     res.json(response);
-  }),
+  })
 );
 
 router
@@ -34,21 +38,21 @@ router
   .all(verifyToken, verifyAdmin)
   .post(
     exceptionHandler(async (req: Request, res: Response) => {
-      const { customer } = req.body;
-      const args = { customer };
+      const { title } = req.body;
+      const args = { title };
       const response = await elementController.addElement(args);
       res.json(response);
-    }),
+    })
   )
   .put(
     exceptionHandler(async (req: Request, res: Response) => {
       let { element } = req.query;
-      const { customer } = req.body;
-      const args = { customer };
+      const { title } = req.body;
+      const args = { title };
       element = element?.toString() || "";
       const response = await elementController.updateElementById(element, args);
       res.json(response);
-    }),
+    })
   )
   .get(
     exceptionHandler(async (req: Request, res: Response) => {
@@ -62,7 +66,7 @@ router
       };
       const response = await elementController.getElements(args);
       res.json(response);
-    }),
+    })
   )
   .delete(
     exceptionHandler(async (req: Request, res: Response) => {
@@ -70,7 +74,7 @@ router
       element = element?.toString() || "";
       const response = await elementController.deleteElementById(element);
       res.json(response);
-    }),
+    })
   );
 
 router.get(
@@ -81,7 +85,7 @@ router.get(
     const { element } = req.params;
     const response = await elementController.getElementById(element);
     res.json(response);
-  }),
+  })
 );
 
 export default router;

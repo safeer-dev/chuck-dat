@@ -1,34 +1,39 @@
 // module imports
 import express, { Request, Response } from "express";
-
+import { SERVICE_ORDER_OFFER } from "../../configs/enum";
 // file imports
 import * as elementController from "./controller";
+import * as serviceOrderController from "../service-order/controller";
+import * as serviceRequestController from "../service-order-request/controller";
+import * as serviceController from "../service/controller";
+
 import { exceptionHandler } from "../../middlewares/exception-handler";
 import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenticator";
 import { IRequest } from "../../configs/types";
 
 // destructuring assignments
-
+const { CONFIRMED } = SERVICE_ORDER_OFFER;
 // variable initializations
 const router = express.Router();
 
-router.get(
-  "/",
-  verifyToken,
-  verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    const { page, limit } = req.query;
-    let { keyword } = req.query;
-    keyword = keyword?.toString() || "";
-    const args = {
-      keyword,
-      limit: Number(limit),
-      page: Number(page),
-    };
-    const response = await elementController.getElements(args);
-    res.json(response);
-  }),
-);
+// router.get(
+//   "/",
+//   verifyToken,
+//   verifyUser,
+//   exceptionHandler(async (req: Request, res: Response) => {
+//     const { page, limit } = req.query;
+//     let { keyword } = req.query;
+//     keyword = keyword?.toString() || "";
+//     const args = {
+//       keyword,
+//       customer,
+//       limit: Number(limit),
+//       page: Number(page),
+//     };
+//     const response = await elementController.getElements(args);
+//     res.json(response);
+//   }),
+// );
 
 router
   .route("/user")
@@ -60,12 +65,11 @@ router
     }),
   )
   .get(
-    exceptionHandler(async (req: Request, res: Response) => {
+    exceptionHandler(async (req: IRequest, res: Response) => {
       const { page, limit } = req.query;
-      let { keyword } = req.query;
-      keyword = keyword?.toString() || "";
+      const customer = req.user._id;
       const args = {
-        keyword,
+        customer,
         limit: Number(limit),
         page: Number(page),
       };
@@ -81,7 +85,30 @@ router
       res.json(response);
     }),
   );
-
+router.put(
+  "/accept-offer",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let { serviceOffer } = req.query;
+    serviceOffer = serviceOffer?.toString() || "";
+    const args = { status: CONFIRMED };
+    const response = await elementController.updateServiceOffer(serviceOffer, args);
+    let element = response.serviceRequest;
+    const serviceRequest = await serviceRequestController.getElementById(element);
+    const service = await serviceController.getElementById(serviceRequest.service);
+    const argsServiceOrder = {
+      customer: response.customer,
+      chucker: response.chucker,
+      date: response.date,
+      serviceRequest: response.serviceRequest,
+      totalPayment: service.charges,
+      service: service._id,
+    };
+    const addserviceOrder = await serviceOrderController.addElement(argsServiceOrder);
+    res.json({ response, addserviceOrder });
+  }),
+);
 // router.get(
 //   "/:element",
 //   verifyToken,

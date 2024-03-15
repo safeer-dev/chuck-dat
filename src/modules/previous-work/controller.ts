@@ -5,6 +5,8 @@ import { isValidObjectId } from "mongoose";
 import ElementModel from "./model";
 import { Element } from "./interface";
 import { GetElementsDTO } from "./dto";
+import { MongoID } from "../../configs/types";
+import { ErrorHandler } from "../../middlewares/error-handler";
 
 // destructuring assignments
 
@@ -26,15 +28,18 @@ export const addElement = async (elementObj: Element) => {
  * @returns {Object} element data
  */
 export const updateElementById = async (
-  element: string,
-  elementObj: Partial<Element>,
+  element: MongoID,
+  elementObj: Partial<Element>
 ) => {
-  if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
-  const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
-    new: true,
-  });
-  if (!elementExists) throw new Error("element not found!|||404");
+  if (!element) throw new ErrorHandler("Please enter element id!", 400);
+  if (!isValidObjectId(element))
+    throw new ErrorHandler("Please enter valid element id!", 400);
+  const elementExists = await ElementModel.findByIdAndUpdate(
+    element,
+    elementObj,
+    { new: true }
+  );
+  if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
 };
 
@@ -46,14 +51,14 @@ export const updateElementById = async (
  */
 export const updateElement = async (
   query: Partial<Element>,
-  elementObj: Partial<Element>,
+  elementObj: Partial<Element>
 ) => {
   if (!query || Object.keys(query).length === 0)
-    throw new Error("Please enter query!|||400");
+    throw new ErrorHandler("Please enter query!", 400);
   const elementExists = await ElementModel.findOneAndUpdate(query, elementObj, {
     new: true,
   });
-  if (!elementExists) throw new Error("element not found!|||404");
+  if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
 };
 
@@ -62,11 +67,12 @@ export const updateElement = async (
  * @param {String} element element id
  * @returns {Object} element data
  */
-export const deleteElementById = async (element: string) => {
-  if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
+export const deleteElementById = async (element: MongoID) => {
+  if (!element) throw new ErrorHandler("Please enter element id!", 400);
+  if (!isValidObjectId(element))
+    throw new ErrorHandler("Please enter valid element id!", 400);
   const elementExists = await ElementModel.findByIdAndDelete(element);
-  if (!elementExists) throw new Error("element not found!|||404");
+  if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
 };
 
@@ -77,9 +83,9 @@ export const deleteElementById = async (element: string) => {
  */
 export const deleteElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
-    throw new Error("Please enter query!|||400");
+    throw new ErrorHandler("Please enter query!", 400);
   const elementExists = await ElementModel.findOneAndDelete(query);
-  if (!elementExists) throw new Error("element not found!|||404");
+  if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
 };
 
@@ -88,13 +94,14 @@ export const deleteElement = async (query: Partial<Element>) => {
  * @param {String} element element id
  * @returns {Object} element data
  */
-export const getElementById = async (element: any) => {
-  if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
+export const getElementById = async (element: MongoID) => {
+  if (!element) throw new ErrorHandler("Please enter element id!", 400);
+  if (!isValidObjectId(element))
+    throw new ErrorHandler("Please enter valid element id!", 400);
   const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v",
+    "-createdAt -updatedAt -__v"
   );
-  if (!elementExists) throw new Error("element not found!|||404");
+  if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
 };
 
@@ -105,11 +112,11 @@ export const getElementById = async (element: any) => {
  */
 export const getElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
-    throw new Error("Please enter query!|||400");
+    throw new ErrorHandler("Please enter query!", 400);
   const elementExists = await ElementModel.findOne(query).select(
-    "-createdAt -updatedAt -__v",
+    "-createdAt -updatedAt -__v"
   );
-  if (!elementExists) throw new Error("element not found!|||404");
+  if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
 };
 
@@ -152,7 +159,7 @@ export const getElements = async (params: GetElementsDTO) => {
  */
 export const checkElementExistence = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
-    throw new Error("Please enter query!|||400");
+    throw new ErrorHandler("Please enter query!", 400);
   return await ElementModel.exists(query);
 };
 
@@ -163,6 +170,6 @@ export const checkElementExistence = async (query: Partial<Element>) => {
  */
 export const countElements = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
-    throw new Error("Please enter query!|||400");
+    throw new ErrorHandler("Please enter query!", 400);
   return await ElementModel.countDocuments(query);
 };

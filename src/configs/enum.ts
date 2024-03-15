@@ -58,20 +58,26 @@ export enum SOCKET_EVENTS {
 
 export enum EXTRA_CHARGES_REQUEST_STATUS {
   PENDING = "pending",
-  CONFRIMED = "confirmed",
+  CONFIRMED = "confirmed",
   REJECTED = "rejected",
 }
 
 export enum SERVICE_ORDER_STATUS {
   IN_PROGRESS = "in_progress",
   PENDING = "pending",
-  CONFRIMED = "confirmed",
+  CONFIRMED = "confirmed",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
 }
 
 export enum SERVICE_REQUEST_STATUS {
   PENDING = "pending",
-  CONFRIMED = "confirmed",
+  CONFIRMED = "confirmed",
+  CANCELLED = "cancelled",
+}
+
+export enum SERVICE_ORDER_OFFER {
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
   CANCELLED = "cancelled",
 }

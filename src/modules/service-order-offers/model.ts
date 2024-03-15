@@ -31,6 +31,7 @@ const elementSchema = new Schema(
       type: Date,
       required: true,
     },
+
     status: {
       type: String,
       enum: Object.values(SERVICE_REQUEST_STATUS),
