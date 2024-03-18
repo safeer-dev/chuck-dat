@@ -20,7 +20,7 @@ const elementSchema = new Schema(
     },
     chucker: {
       type: Schema.Types.ObjectId,
-      ref: "chuckere",
+      ref: "chuckers",
       index: true,
       required: true,
     },

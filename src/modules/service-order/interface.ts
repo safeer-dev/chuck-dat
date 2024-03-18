@@ -8,9 +8,11 @@ export interface Element {
   subServices?: any;
   location?: any;
   extraChargesRequested?: any;
-  extraChargesStatus?: any;
+  extraChargesStatus?: EXTRA_CHARGES_REQUEST_STATUS;
   totalPayment?: any;
-  status?: any;
+  status?: SERVICE_ORDER_STATUS;
   mediaBeforeWork?: any;
   mediaAfterWork?: any;
+  declinedfeedback?: string;
+  feedbackStatus?: string;
 }

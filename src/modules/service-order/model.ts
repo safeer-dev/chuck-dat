@@ -1,7 +1,11 @@
 // module imports
 import mongoose from "mongoose";
 
-import { SERVICE_ORDER_STATUS, EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
+import {
+  SERVICE_ORDER_STATUS,
+  EXTRA_CHARGES_REQUEST_STATUS,
+  SERVICE_ORDER_FEEDBACK,
+} from "../../configs/enum";
 const { CONFIRMED } = SERVICE_ORDER_STATUS;
 
 // variable initializations
@@ -40,12 +44,6 @@ const elementSchema = new Schema(
         index: true,
       },
     ],
-    location: {
-      type: Schema.Types.ObjectId,
-      ref: "locations",
-
-      index: true,
-    },
     extraChargesRequested: {
       type: Boolean,
       default: false,
@@ -61,6 +59,11 @@ const elementSchema = new Schema(
       default: CONFIRMED,
       required: true,
     },
+    feedbackStatus: {
+      type: String,
+      enum: Object.values(SERVICE_ORDER_FEEDBACK),
+    },
+    declinedfeedback: { type: String },
     mediaBeforeWork: [
       {
         type: String,

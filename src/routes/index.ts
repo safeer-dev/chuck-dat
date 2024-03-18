@@ -10,6 +10,7 @@ import user from "../modules/user/route";
 import service from "../modules/service/route";
 import serviceRequest from "../modules/service-order-request/route";
 import serviceOffers from "../modules/service-order-offers/route";
+import serviceOrders from "../modules/service-order/route";
 
 import subService from "../modules/sub-service/route";
 import chucker from "../modules/chucker/route";
@@ -30,6 +31,7 @@ router.use("/service", service);
 router.use("/sub-service", subService);
 router.use("/service-request", serviceRequest);
 router.use("/service-offers", serviceOffers);
+router.use("/service-orders", serviceOrders);
 
 router.use("/chucker", chucker);
 router.use("/customer-location", customerLocation);

@@ -63,11 +63,17 @@ export enum EXTRA_CHARGES_REQUEST_STATUS {
 }
 
 export enum SERVICE_ORDER_STATUS {
-  IN_PROGRESS = "in_progress",
+  IN_PROGRESS = "in progress",
   PENDING = "pending",
   CONFIRMED = "confirmed",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
+}
+
+export enum SERVICE_ORDER_FEEDBACK {
+  REJECTED = "rejected",
+  APPROVED = "approved",
+  AWAITING = "awaiting",
 }
 
 export enum SERVICE_REQUEST_STATUS {

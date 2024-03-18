@@ -3,5 +3,6 @@ import { MongoID } from "../../configs/types";
 
 export interface Element {
   _id?: MongoID;
-  title: string;
+  images: [string];
+  chucker: MongoID;
 }
