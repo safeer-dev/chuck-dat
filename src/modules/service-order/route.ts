@@ -10,6 +10,7 @@ import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenti
 import { SERVICE_ORDER_FEEDBACK } from "../../configs/enum";
 import { SERVICE_ORDER_STATUS } from "../../configs/enum";
 import { EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
+import { IRequest } from "../../configs/types";
 
 const { COMPLETED } = SERVICE_ORDER_STATUS;
 const { AWAITING, REJECTED, APPROVED } = SERVICE_ORDER_FEEDBACK;
@@ -247,6 +248,63 @@ router.put(
     const response = await elementController.updateElementById(element, args);
 
     res.json({ response });
+  }),
+);
+
+router.get(
+  "/chucker/orders",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { page, limit } = req.query;
+    let { keyword } = req.body;
+    const chucker = req.user._id;
+    // keyword = keyword?.toString() || "";
+    const args = {
+      chucker,
+      keyword,
+      limit: Number(limit),
+      page: Number(page),
+    };
+    const response = await elementController.getOrders(args);
+    res.json(response);
+  }),
+);
+
+router.get(
+  "/customer/current-orders",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { page, limit } = req.query;
+    const { keyword } = req.body;
+    const customer = req.body._id;
+    // keyword = keyword?.toString() || "";
+    const args = {
+      customer,
+      keyword,
+      limit: Number(limit),
+      page: Number(page),
+    };
+    const response = await elementController.getCustomerCurrentOrders(args);
+    res.json(response);
+  }),
+);
+
+router.get(
+  "/customer/previous-orders",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { page, limit } = req.query;
+    const customer = req.body._id;
+    const args = {
+      customer,
+      limit: Number(limit),
+      page: Number(page),
+    };
+    const response = await elementController.getCustomerCurrentOrders(args);
+    res.json(response);
   }),
 );
 

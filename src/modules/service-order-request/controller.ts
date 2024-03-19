@@ -212,3 +212,9 @@ export const countElements = async (query: Partial<Element>) => {
     throw new Error("Please enter query!|||400");
   return await ElementModel.countDocuments(query);
 };
+
+export const getPendingOrderRequest = async (customer: string) => {
+  const pendingOrders = await ElementModel.find({ customer, status: "pending" });
+
+  return pendingOrders;
+};
