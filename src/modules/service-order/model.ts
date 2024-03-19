@@ -69,6 +69,10 @@ const elementSchema = new Schema(
         type: String,
       },
     ],
+    isFeedbackPosted: {
+      type: Boolean,
+      default: false,
+    },
     mediaAfterWork: [{ type: String }],
   },
   { timestamps: true },

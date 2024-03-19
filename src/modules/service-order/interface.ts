@@ -15,4 +15,5 @@ export interface Element {
   mediaAfterWork?: any;
   declinedfeedback?: string;
   feedbackStatus?: string;
+  isFeedbackPosted?: boolean;
 }

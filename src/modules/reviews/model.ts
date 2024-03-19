@@ -34,4 +34,4 @@ const elementSchema = new Schema(
   { timestamps: true },
 );
 
-export default model("feedbacks", elementSchema);
+export default model("reviews", elementSchema);

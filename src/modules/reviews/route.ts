@@ -37,8 +37,8 @@ router
   .post(
     exceptionHandler(async (req: IRequest, res: Response) => {
       const customer = req.user._id;
-      const { chucker, serviceOrder, feedback } = req.body;
-      const args = { feedback, chucker, customer, serviceOrder };
+      const { feedback, chucker, serviceOrder, rating } = req.body;
+      const args = { feedback, chucker, customer, serviceOrder, rating };
       const response = await elementController.addElement(args);
       const arg = { isFeedbackPosted: true };
       const responseOrder = await serviceOrderController.updateElementById(
@@ -51,8 +51,8 @@ router
   .put(
     exceptionHandler(async (req: Request, res: Response) => {
       let { element } = req.query;
-      const { feedback } = req.body;
-      const args = { feedback };
+      const { feedback, chucker, serviceOrder, rating } = req.body;
+      const args = { feedback, chucker, serviceOrder, rating };
       element = element?.toString() || "";
       const response = await elementController.updateElementById(element, args);
       res.json(response);

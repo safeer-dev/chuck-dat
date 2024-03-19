@@ -3,5 +3,5 @@ export interface Element {
   chucker: any;
   customer: any;
   serviceOrder: any;
-  rating?: number;
+  rating: number;
 }

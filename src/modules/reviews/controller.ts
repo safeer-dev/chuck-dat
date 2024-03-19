@@ -25,7 +25,10 @@ export const addElement = async (elementObj: Element) => {
  * @param {Object} elementObj element data
  * @returns {Object} element data
  */
-export const updateElementById = async (element: any, elementObj: Partial<Element>) => {
+export const updateElementById = async (
+  element: string,
+  elementObj: Partial<Element>,
+) => {
   if (!element) throw new Error("Please enter element id!|||400");
   if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
@@ -162,30 +165,4 @@ export const countElements = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new Error("Please enter query!|||400");
   return await ElementModel.countDocuments(query);
-};
-
-export const setExtraChargesRequested = async (element: string) => {
-  try {
-    const result = await ElementModel.updateOne(
-      { _id: element },
-      { $set: { extraChargesRequested: true } },
-    );
-    return result;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-};
-
-export const setExtraChargesRequestedFalse = async (element: string) => {
-  try {
-    const result = await ElementModel.updateOne(
-      { _id: element },
-      { $set: { extraChargesRequested: false } },
-    );
-    return result;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
 };

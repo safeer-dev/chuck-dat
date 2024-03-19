@@ -9,9 +9,11 @@ import { exceptionHandler } from "../../middlewares/exception-handler";
 import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenticator";
 import { SERVICE_ORDER_FEEDBACK } from "../../configs/enum";
 import { SERVICE_ORDER_STATUS } from "../../configs/enum";
+import { EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
+
 const { COMPLETED } = SERVICE_ORDER_STATUS;
 const { AWAITING, REJECTED, APPROVED } = SERVICE_ORDER_FEEDBACK;
-
+const { CONFIRMED } = EXTRA_CHARGES_REQUEST_STATUS;
 // destructuring assignments
 
 // variable initializations
@@ -143,12 +145,52 @@ router.put(
     const args = { status };
     element = element?.toString() || "";
     const response = await extraChargesController.updateElementById(element, args);
-    res.json(response);
+    const arg = { extraChargesStatus: CONFIRMED };
+    const serviceOrder = response.serviceOrder;
+    const responseServiceOrder = await elementController.updateElementById(
+      serviceOrder,
+      arg,
+    );
+    res.json({ response, responseServiceOrder });
+  }),
+);
+
+router.put(
+  "/decline-extra-charges-request",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { status } = req.body;
+    const args = { status };
+    element = element?.toString() || "";
+    const response = await extraChargesController.updateElementById(element, args);
+    const arg = { extraChargesStatus: EXTRA_CHARGES_REQUEST_STATUS.REJECTED };
+    const serviceOrder = response.serviceOrder;
+    const responseServiceOrder = await elementController.updateElementById(
+      serviceOrder,
+      arg,
+    );
+    res.json({ response, responseServiceOrder });
   }),
 );
 
 router.put(
   "/start-work",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { status } = req.body;
+    const args = { status };
+    element = element?.toString() || "";
+    const response = await elementController.updateElementById(element, args);
+    res.json(response);
+  }),
+);
+
+router.put(
+  "/cancel-order",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
