@@ -257,14 +257,14 @@ router.get(
   verifyUser,
   exceptionHandler(async (req: IRequest, res: Response) => {
     const { page, limit } = req.query;
-    let { keyword } = req.body;
+    const { keyword, date } = req.body;
     const chucker = req.user._id;
-    // keyword = keyword?.toString() || "";
     const args = {
       chucker,
       keyword,
       limit: Number(limit),
       page: Number(page),
+      date,
     };
     const response = await elementController.getOrders(args);
     res.json(response);

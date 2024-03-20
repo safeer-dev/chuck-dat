@@ -192,12 +192,15 @@ export const setExtraChargesRequestedFalse = async (element: string) => {
 };
 
 export const getOrders = async (params: GetOrdersDTO) => {
-  let { limit, page, keyword, chucker } = params;
+  let { limit, page, keyword, chucker, date } = params;
   page = page - 1 || 0;
   limit = limit || 10;
   const query: any = { chucker };
   if (keyword) {
     query.status = keyword;
+  }
+  if (date) {
+    query.date = date;
   }
 
   const [result] = await ElementModel.aggregate([

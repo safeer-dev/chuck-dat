@@ -12,6 +12,7 @@ export type GetOrdersDTO = {
   page: number;
   keyword?: SERVICE_ORDER_STATUS;
   chucker: any;
+  date?: any;
 };
 
 export type GetCustomerOrdersDTO = {
