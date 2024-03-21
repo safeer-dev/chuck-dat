@@ -77,10 +77,7 @@ export const login = async (params: LoginDTO) => {
   if (userExists.status !== ACTIVE)
     throw new ErrorHandler(`User ${userExists.status}!`, 403);
 
-  await userController.updateElement(
-    { _id: userExists._id },
-    { lastLogin: new Date() },
-  );
+  await userController.updateElement({ _id: userExists._id }, { lastLogin: new Date() });
 
   return userExists.getSignedjwtToken();
 };
@@ -149,8 +146,7 @@ export const generateEmailToken = async (params: GenerateEmailTokenDTO) => {
   const { email, tokenExpirationTime } = params;
   console.log("i m in token email generation", email);
   const userExists: any = await userController.getElement({ email });
-  if (!userExists)
-    throw new ErrorHandler("User with given email doesn't exist!", 404);
+  if (!userExists) throw new ErrorHandler("User with given email doesn't exist!", 404);
   let userTokenExists = await userTokenController.getElement({
     user: userExists._id,
   });
@@ -169,9 +165,7 @@ export const generateEmailToken = async (params: GenerateEmailTokenDTO) => {
  * @description Reset user password
  * @param {Object} params user password reset data
  */
-export const resetPassword = async (
-  params: ResetPasswordDTO,
-): Promise<void> => {
+export const resetPassword = async (params: ResetPasswordDTO): Promise<void> => {
   const { password, user, token } = params;
 
   const userExists: any = await userController.getElementById(user);
