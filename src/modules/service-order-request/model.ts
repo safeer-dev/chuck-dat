@@ -21,12 +21,14 @@ const elementSchema = new Schema(
       required: true,
       index: true,
     },
-    decliners: {
-      type: Schema.Types.ObjectId,
-      ref: "chuckers",
+    decliners: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "chuckers",
 
-      index: true,
-    },
+        index: true,
+      },
+    ],
     lotSize: {
       type: String,
     },

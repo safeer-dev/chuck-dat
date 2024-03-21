@@ -92,8 +92,9 @@ router.get(
     res.json(response);
   }),
 );
+
 router.put(
-  "/media-before-work",
+  "/chucker/media-before-work",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
@@ -107,7 +108,7 @@ router.put(
 );
 
 router.put(
-  "/extra-charges-request",
+  "/chucker/extra-charges-request",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
@@ -122,7 +123,7 @@ router.put(
 );
 
 router.put(
-  "/cancel-extra-charges-request",
+  "/chucker/cancel-extra-charges-request",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
@@ -137,47 +138,7 @@ router.put(
 );
 
 router.put(
-  "/approve-extra-charges-request",
-  verifyToken,
-  verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    let { element } = req.query;
-    const { status } = req.body;
-    const args = { status };
-    element = element?.toString() || "";
-    const response = await extraChargesController.updateElementById(element, args);
-    const arg = { extraChargesStatus: CONFIRMED };
-    const serviceOrder = response.serviceOrder;
-    const responseServiceOrder = await elementController.updateElementById(
-      serviceOrder,
-      arg,
-    );
-    res.json({ response, responseServiceOrder });
-  }),
-);
-
-router.put(
-  "/decline-extra-charges-request",
-  verifyToken,
-  verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    let { element } = req.query;
-    const { status } = req.body;
-    const args = { status };
-    element = element?.toString() || "";
-    const response = await extraChargesController.updateElementById(element, args);
-    const arg = { extraChargesStatus: EXTRA_CHARGES_REQUEST_STATUS.REJECTED };
-    const serviceOrder = response.serviceOrder;
-    const responseServiceOrder = await elementController.updateElementById(
-      serviceOrder,
-      arg,
-    );
-    res.json({ response, responseServiceOrder });
-  }),
-);
-
-router.put(
-  "/start-work",
+  "/chucker/start-work",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
@@ -191,7 +152,7 @@ router.put(
 );
 
 router.put(
-  "/cancel-order",
+  "/chucker/cancel-order",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
@@ -205,7 +166,7 @@ router.put(
 );
 
 router.put(
-  "/submit-work",
+  "/chucker/submit-work",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
@@ -218,36 +179,6 @@ router.put(
     const previousWork = await previousWorkController.addElement(argsPreviousWork);
 
     res.json({ response, previousWork });
-  }),
-);
-
-router.put(
-  "/accept-work",
-  verifyToken,
-  verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    let { element } = req.query;
-    // const { mediaAfterWork, notes } = req.body;
-    const args = { feedbackStatus: APPROVED, status: COMPLETED };
-    element = element?.toString() || "";
-    const response = await elementController.updateElementById(element, args);
-
-    res.json({ response });
-  }),
-);
-
-router.put(
-  "/decline-work",
-  verifyToken,
-  verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    let { element } = req.query;
-    const { declinedfeedback } = req.body;
-    const args = { declinedfeedback, feedbackStatus: REJECTED };
-    element = element?.toString() || "";
-    const response = await elementController.updateElementById(element, args);
-
-    res.json({ response });
   }),
 );
 
@@ -268,6 +199,78 @@ router.get(
     };
     const response = await elementController.getOrders(args);
     res.json(response);
+  }),
+);
+
+//customer related routes
+
+router.put(
+  "/customer/approve-extra-charges-request",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { status } = req.body;
+    const args = { status };
+    element = element?.toString() || "";
+    const response = await extraChargesController.updateElementById(element, args);
+    const arg = { extraChargesStatus: CONFIRMED };
+    const serviceOrder = response.serviceOrder;
+    const responseServiceOrder = await elementController.updateElementById(
+      serviceOrder,
+      arg,
+    );
+    res.json({ response, responseServiceOrder });
+  }),
+);
+
+router.put(
+  "/customer/decline-extra-charges-request",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { status } = req.body;
+    const args = { status };
+    element = element?.toString() || "";
+    const response = await extraChargesController.updateElementById(element, args);
+    const arg = { extraChargesStatus: EXTRA_CHARGES_REQUEST_STATUS.REJECTED };
+    const serviceOrder = response.serviceOrder;
+    const responseServiceOrder = await elementController.updateElementById(
+      serviceOrder,
+      arg,
+    );
+    res.json({ response, responseServiceOrder });
+  }),
+);
+
+router.put(
+  "/customer/accept-work",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    // const { mediaAfterWork, notes } = req.body;
+    const args = { feedbackStatus: APPROVED, status: COMPLETED };
+    element = element?.toString() || "";
+    const response = await elementController.updateElementById(element, args);
+
+    res.json({ response });
+  }),
+);
+
+router.put(
+  "/customer/decline-work",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const { declinedfeedback } = req.body;
+    const args = { declinedfeedback, feedbackStatus: REJECTED };
+    element = element?.toString() || "";
+    const response = await elementController.updateElementById(element, args);
+
+    res.json({ response });
   }),
 );
 

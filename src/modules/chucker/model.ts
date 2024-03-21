@@ -36,7 +36,7 @@ const serviceProviderSchema = new Schema(
     },
     isProfileVerified: {
       type: Boolean,
-      default: true,
+      default: false,
       select: false,
       // required: true,
     },

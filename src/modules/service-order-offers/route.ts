@@ -36,7 +36,7 @@ const router = express.Router();
 // );
 
 router
-  .route("/user")
+  .route("/chucker")
   .all(verifyToken, verifyUser)
   .post(
     exceptionHandler(async (req: IRequest, res: Response) => {
@@ -85,8 +85,25 @@ router
       res.json(response);
     }),
   );
+
 router.put(
-  "/accept-offer",
+  "/chucker/decline-service-request",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { serviceRequest } = req.body;
+    const chucker = req.user._id;
+    const args = {
+      chucker,
+    };
+    const response = await serviceRequestController.addDecliner(serviceRequest, chucker);
+    res.json(response);
+  }),
+);
+
+//customer routes
+router.put(
+  "/customer/accept-offer",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: IRequest, res: Response) => {

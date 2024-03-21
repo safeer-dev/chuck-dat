@@ -101,4 +101,39 @@ router.get(
   }),
 );
 
+router.get(
+  "/chucker/all",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { page, limit } = req.query;
+    const chucker = req.user._id;
+    const args = {
+      chucker,
+      limit: Number(limit),
+      page: Number(page),
+    };
+    const response = await elementController.getOrderRequests(args);
+    res.json(response);
+  }),
+);
+
+router.get(
+  "/chucker/single",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const chucker = req.user._id;
+    let { requestId } = req.query;
+    requestId = requestId?.toString() || "";
+
+    const args = {
+      chucker,
+      requestId,
+    };
+    const response = await elementController.getOrderRequest(args);
+    res.json(response);
+  }),
+);
+
 export default router;
