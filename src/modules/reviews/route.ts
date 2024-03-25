@@ -82,12 +82,18 @@ router
   );
 
 router.get(
-  "/:element",
+  "/chucker",
   verifyToken,
   verifyAdmin,
-  exceptionHandler(async (req: Request, res: Response) => {
-    const { element } = req.params;
-    const response = await elementController.getElementById(element);
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { page, limit } = req.query;
+    const user = req.user._id;
+    const args = {
+      chucker: user.toString(),
+      limit: Number(limit),
+      page: Number(page),
+    };
+    const response = await elementController.getElements(args);
     res.json(response);
   }),
 );

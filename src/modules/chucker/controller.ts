@@ -30,13 +30,10 @@ export const updateElementById = async (
   elementObj: Partial<Element>,
 ) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id ||| 400");
-  const elementExists = await ElementModel.findByIdAndUpdate(
-    element,
-    elementObj,
-    { new: true },
-  );
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id ||| 400");
+  const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
+    new: true,
+  });
   if (!elementExists) throw new Error("element not found ||| 404");
   return elementExists;
 };
@@ -67,8 +64,7 @@ export const updateElement = async (
  */
 export const deleteElementById = async (element: string) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findByIdAndDelete(element);
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -92,15 +88,100 @@ export const deleteElement = async (query: Partial<Element>) => {
  * @param {String} element element id
  * @returns {Object} element data
  */
+// export const getElementById = async (element: string) => {
+//   if (!element) throw new Error("Please enter element id!|||400");
+//   if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
+//   const elementExists = await ElementModel.findById(element)
+//     .select("-createdAt -updatedAt -__v")
+//     .populate({
+//       path: "users",
+//       select: "name   image isOnline isAccountVerified",
+//     });
+//   if (!elementExists) throw new Error("element not found!|||404");
+//   return elementExists;
+// };
+
+import mongoose from "mongoose";
+
 export const getElementById = async (element: string) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
+  if (!mongoose.Types.ObjectId.isValid(element))
     throw new Error("Please enter valid element id!|||400");
-  const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v",
-  );
-  if (!elementExists) throw new Error("element not found!|||404");
-  return elementExists;
+
+  const elementExists = await ElementModel.aggregate([
+    { $match: { _id: new mongoose.Types.ObjectId(element) } },
+    {
+      $project: {
+        createdAt: 0,
+        updatedAt: 0,
+        __v: 0,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user",
+    },
+    {
+      $project: {
+        "user.name": 1,
+        "user.image": 1,
+        "user.isOnline": 1,
+        "user.isAccountVerified": 1,
+      },
+    },
+    {
+      $lookup: {
+        from: "service-orders",
+        let: { chuckerId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$chucker", "$$chuckerId"] },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              completedCount: {
+                $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+              },
+              receivedCount: {
+                $sum: {
+                  $cond: [
+                    { $in: ["$status", ["in_progress", "confirmed", "cancelled"]] },
+                    1,
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        ],
+        as: "ordersSummary",
+      },
+    },
+    {
+      $unwind: { path: "$ordersSummary", preserveNullAndEmptyArrays: true },
+    },
+    {
+      $addFields: {
+        "users.ordersCompletedCount": "$ordersSummary.completedCount",
+        "users.ordersReceivedCount": "$ordersSummary.receivedCount",
+      },
+    },
+  ]);
+
+  if (!elementExists || elementExists.length === 0)
+    throw new Error("Element not found!|||404");
+
+  return elementExists[0];
 };
 
 /**

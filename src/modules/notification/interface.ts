@@ -4,7 +4,7 @@ import { NOTIFICATION_TYPES } from "../../configs/enum";
 
 export interface Element {
   _id?: MongoID;
-  type: NOTIFICATION_TYPES;
+  type?: NOTIFICATION_TYPES;
   user: MongoID;
   message?: MongoID;
   messenger?: MongoID;

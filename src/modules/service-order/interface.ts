@@ -16,4 +16,6 @@ export interface Element {
   declinedfeedback?: string;
   feedbackStatus?: string;
   isFeedbackPosted?: boolean;
+  isChuckerReached?: boolean;
+  isChuckerMoving?: boolean;
 }

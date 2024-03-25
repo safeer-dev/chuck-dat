@@ -11,11 +11,10 @@ import { SERVICE_ORDER_FEEDBACK } from "../../configs/enum";
 import { SERVICE_ORDER_STATUS } from "../../configs/enum";
 import { EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
 import { IRequest } from "../../configs/types";
-import SocketManager from "../../utils/socket-manager";
 
-const { COMPLETED } = SERVICE_ORDER_STATUS;
+const { COMPLETED, CANCELLED, IN_PROGRESS, PENDING, CONFIRMED } = SERVICE_ORDER_STATUS;
 const { AWAITING, REJECTED, APPROVED } = SERVICE_ORDER_FEEDBACK;
-const { CONFIRMED } = EXTRA_CHARGES_REQUEST_STATUS;
+
 // destructuring assignments
 
 // variable initializations
@@ -95,6 +94,33 @@ router.get(
 );
 
 router.put(
+  "/chucker/start-moving",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+    const args = { isChuckerMoving: true };
+    element = element?.toString() || "";
+    const response = await elementController.updateElementById(element, args);
+    res.json(response);
+  }),
+);
+
+router.put(
+  "/chucker/reached",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+
+    const args = { isChuckerReached: true };
+    element = element?.toString() || "";
+    const response = await elementController.updateElementById(element, args);
+    res.json(response);
+  }),
+);
+
+router.put(
   "/chucker/media-before-work",
   verifyToken,
   verifyUser,
@@ -158,8 +184,7 @@ router.put(
   verifyUser,
   exceptionHandler(async (req: Request, res: Response) => {
     let { element } = req.query;
-    const { status } = req.body;
-    const args = { status };
+    const args = { status: CANCELLED };
     element = element?.toString() || "";
     const response = await elementController.updateElementById(element, args);
     res.json(response);
@@ -189,11 +214,11 @@ router.get(
   verifyUser,
   exceptionHandler(async (req: IRequest, res: Response) => {
     const { page, limit } = req.query;
-    const { keyword, date } = req.body;
+    const { status, date } = req.body;
     const chucker = req.user._id;
     const args = {
       chucker,
-      keyword,
+      status,
       limit: Number(limit),
       page: Number(page),
       date,
@@ -216,18 +241,14 @@ router.put(
     element = element?.toString() || "";
     const response = await extraChargesController.updateElementById(element, args);
     // const totalPayment = +response.amount;
-    const arg = { extraChargesStatus: CONFIRMED };
+    const arg = { extraChargesStatus: EXTRA_CHARGES_REQUEST_STATUS.CONFIRMED };
     const serviceOrder = response.serviceOrder;
 
     const responseServiceOrder = await elementController.updateElementById(
       serviceOrder,
       arg,
     );
-    await new SocketManager().emitEvent({
-      to: responseServiceOrder.chucker.toString(),
-      event: "reminder",
-      data: responseServiceOrder,
-    });
+
     res.json({ response, responseServiceOrder });
   }),
 );
@@ -315,6 +336,20 @@ router.get(
       page: Number(page),
     };
     const response = await elementController.getCustomerCurrentOrders(args);
+    res.json(response);
+  }),
+);
+
+router.put(
+  "/customer/cancel-order",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: Request, res: Response) => {
+    let { element } = req.query;
+
+    const args = { status: CANCELLED };
+    element = element?.toString() || "";
+    const response = await elementController.cancelCustomerOrder(element, args);
     res.json(response);
   }),
 );

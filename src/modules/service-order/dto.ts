@@ -10,7 +10,7 @@ export type GetElementsDTO = {
 export type GetOrdersDTO = {
   limit: number;
   page: number;
-  keyword?: SERVICE_ORDER_STATUS;
+  status?: SERVICE_ORDER_STATUS;
   chucker: any;
   date?: any;
 };

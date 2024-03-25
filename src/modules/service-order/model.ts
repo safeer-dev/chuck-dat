@@ -74,6 +74,16 @@ const elementSchema = new Schema(
       default: false,
     },
     mediaAfterWork: [{ type: String }],
+    isChuckerReached: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
+    isChuckerMoving: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
   },
   { timestamps: true },
 );

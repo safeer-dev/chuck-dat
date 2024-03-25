@@ -103,12 +103,16 @@ const userSchema = new Schema(
     },
     isEmailVerified: {
       type: Boolean,
-      default: true,
+      default: false,
       select: false,
-      required: true,
     },
     lastLogin: {
       type: Date,
+      select: false,
+    },
+    isAccountVerified: {
+      type: Boolean,
+      default: false,
       select: false,
     },
     admin: {
@@ -168,10 +172,7 @@ const userSchema = new Schema(
 );
 
 userSchema.methods.getSignedjwtToken = function () {
-  return jwt.sign(
-    { _id: this._id, type: this.type },
-    process.env.JWT_SECRET || "",
-  );
+  return jwt.sign({ _id: this._id, type: this.type }, process.env.JWT_SECRET || "");
 };
 
 userSchema.methods.populate = async function (field: string) {

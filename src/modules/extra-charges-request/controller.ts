@@ -3,13 +3,19 @@ import { isValidObjectId } from "mongoose";
 
 // file imports
 import ElementModel from "./model";
+import * as notificationsController from "../notification/controller";
+import * as serviceOrderController from "../service-order/controller";
+import { EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
+import { NOTIFICATION_TYPES } from "../../configs/enum";
 import { Element } from "./interface";
 import { GetElementsDTO } from "./dto";
 import { MongoID } from "../../configs/types";
 import { ErrorHandler } from "../../middlewares/error-handler";
 
 // destructuring assignments
-
+const { CONFIRMED, REJECTED } = EXTRA_CHARGES_REQUEST_STATUS;
+const { EXTRA_CHARGES_REQUEST_ACCEPTED, EXTRA_CHARGES_REQUEST_REJECTED } =
+  NOTIFICATION_TYPES;
 // variable initializations
 
 /**
@@ -29,17 +35,59 @@ export const addElement = async (elementObj: Element) => {
  */
 export const updateElementById = async (
   element: MongoID,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
+  const { status } = elementObj;
   if (!element) throw new ErrorHandler("Please enter element id!", 400);
   if (!isValidObjectId(element))
     throw new ErrorHandler("Please enter valid element id!", 400);
-  const elementExists = await ElementModel.findByIdAndUpdate(
-    element,
-    elementObj,
-    { new: true }
-  );
+  const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
+    new: true,
+  });
   if (!elementExists) throw new ErrorHandler("element not found!", 404);
+  // if (elementExists) {
+  //   const serviceOrder = await serviceOrderController.getElementById(
+  //     elementExists.serviceOrder.toString(),
+  //   );
+  //   if (status == CONFIRMED) {
+  //     const notificationObj = {
+  //       type: EXTRA_CHARGES_REQUEST_ACCEPTED,
+  //       user: serviceOrder.chucker,
+  //       socketData: serviceOrder,
+  //       event: `extraChargesRequestAccepted_${serviceOrder._id.toString()}`,
+  //       title: "extra charges Request Accepted",
+  //       body: `Your extra charges request has been accepted`,
+  //       notificationData: { user: serviceOrder.chucker, order: serviceOrder._id },
+  //       firebaseData: { order: serviceOrder._id.toString() },
+  //       useSocket: true,
+  //       useFirebase: true,
+  //       useDatabase: true,
+  //     };
+
+  //     await notificationsController.notifyUsers(notificationObj);
+  //   } else if (status == REJECTED) {
+  //     //  await new SocketManager().emitEvent({
+  //     //    to: responseServiceOrder.chucker.toString(),
+  //     //    event: "",
+  //     //    data: responseServiceOrder,
+  //     //  });
+  //     const notificationObj = {
+  //       type: EXTRA_CHARGES_REQUEST_REJECTED,
+  //       user: serviceOrder.chucker,
+  //       socketData: serviceOrder,
+  //       event: `extraChargesRequestRejected_${serviceOrder._id.toString()}`,
+  //       title: "extra charges request rejected",
+  //       body: `Your extra charges request has been rejected`,
+  //       notificationData: { user: serviceOrder.chucker, order: serviceOrder._id },
+  //       firebaseData: { order: serviceOrder._id.toString() },
+  //       useSocket: true,
+  //       useFirebase: true,
+  //       useDatabase: true,
+  //     };
+
+  //     await notificationsController.notifyUsers(notificationObj);
+  //   }
+  // }
   return elementExists;
 };
 
@@ -51,7 +99,7 @@ export const updateElementById = async (
  */
 export const updateElement = async (
   query: Partial<Element>,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler("Please enter query!", 400);
@@ -99,7 +147,7 @@ export const getElementById = async (element: MongoID) => {
   if (!isValidObjectId(element))
     throw new ErrorHandler("Please enter valid element id!", 400);
   const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
@@ -114,7 +162,7 @@ export const getElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new ErrorHandler("Please enter query!", 400);
   const elementExists = await ElementModel.findOne(query).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;

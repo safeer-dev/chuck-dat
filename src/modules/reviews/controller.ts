@@ -119,10 +119,10 @@ export const getElement = async (query: Partial<Element>) => {
  * @returns {Object[]} elements data
  */
 export const getElements = async (params: GetElementsDTO) => {
-  let { limit, page } = params;
+  let { limit, page, chucker } = params;
   page = page - 1 || 0;
   limit = limit || 10;
-  const query: any = {};
+  const query: any = { chucker: chucker };
   const [result] = await ElementModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },

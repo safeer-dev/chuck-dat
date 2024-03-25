@@ -25,11 +25,6 @@ export enum PAYMENT_ACCOUNT_TYPES {
   STRIPE_ACCOUNT = "stripe_account",
 }
 
-export enum NOTIFICATION_TYPES {
-  NEW_MESSAGE = "new_message",
-  CUSTOM = "custom",
-}
-
 export enum USER_STATUSES {
   ACTIVE = "active",
   DELETED = "deleted",
@@ -87,4 +82,20 @@ export enum SERVICE_ORDER_OFFER {
   PENDING = "pending",
   CONFIRMED = "confirmed",
   CANCELLED = "cancelled",
+}
+
+export enum NOTIFICATION_TYPES {
+  NEW_MESSAGE = "new_message",
+  NEW_ORDER_REQUEST = "new_order_request",
+  NEW_ORDER_OFFER = "new_order_offer",
+  ORDER_OFFER_ACCEPTED = "order_request_accepted",
+  EXTRA_CHARGES_REQUEST_ACCEPTED = "extra_charges_request_rejected",
+  EXTRA_CHARGES_REQUEST_REJECTED = "extra_charges_request_accepted",
+  ORDER_STARTED = "order_started",
+  CHUCKER_COMING = "chucker_coming",
+  CHUCKER_REACHED = "chucker_reached",
+  ORDER_WORK_SUBMITTED = "order_work_submitted",
+  ORDER_FEEDBACK_SUBMITTED = "order_feedback_submitted",
+  ORDER_CANCELLED = "order_cancelled",
+  ORDER_REJECTED = "order_rejected",
 }

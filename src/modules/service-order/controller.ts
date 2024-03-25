@@ -4,10 +4,13 @@ import { isValidObjectId } from "mongoose";
 // file imports
 import ElementModel from "./model";
 import { Element } from "./interface";
+import { SERVICE_ORDER_STATUS } from "../../configs/enum";
+
 import { GetElementsDTO, GetCustomerOrdersDTO, GetOrdersDTO } from "./dto";
 import * as orderRequestController from "../service-order-request/controller";
 
 // destructuring assignments
+const { COMPLETED, CANCELLED, IN_PROGRESS, PENDING, CONFIRMED } = SERVICE_ORDER_STATUS;
 
 // variable initializations
 
@@ -34,6 +37,21 @@ export const updateElementById = async (element: any, elementObj: Partial<Elemen
   });
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
+};
+
+export const cancelCustomerOrder = async (element: any, elementObj: Partial<Element>) => {
+  if (!element) throw new Error("Please enter element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
+  const elementExists = await ElementModel.findById(element);
+  if (!elementExists) throw new Error("element not found!|||404");
+  if (elementExists.status == CONFIRMED) {
+    const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
+      new: true,
+    });
+    return elementExists;
+  } else {
+    throw new Error("order in progress can not be cancelled contact us! |||404");
+  }
 };
 
 /**
@@ -192,12 +210,12 @@ export const setExtraChargesRequestedFalse = async (element: string) => {
 };
 
 export const getOrders = async (params: GetOrdersDTO) => {
-  let { limit, page, keyword, chucker, date } = params;
+  let { limit, page, status, chucker, date } = params;
   page = page - 1 || 0;
   limit = limit || 10;
   const query: any = { chucker };
-  if (keyword) {
-    query.status = keyword;
+  if (status) {
+    query.status = status;
   }
   if (date) {
     query.date = date;

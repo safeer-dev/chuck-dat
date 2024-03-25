@@ -7,13 +7,10 @@ import * as chuckerServiceController from "../chucker-service/controller";
 import * as userController from "../user/controller";
 import * as serviceAreaController from "../service-area/controller";
 import { exceptionHandler } from "../../middlewares/exception-handler";
-import {
-  verifyToken,
-  verifyAdmin,
-  verifyUser,
-} from "../../middlewares/authenticator";
+import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenticator";
 import { PUBLIC_DIRECTORY } from "../../configs/directories";
 import { upload } from "../../middlewares/uploader";
+import { IRequest } from "../../configs/types";
 const uploadTemporary = upload(PUBLIC_DIRECTORY);
 // destructuring assignments
 
@@ -61,14 +58,9 @@ router
       };
 
       element = element?.toString() || "";
-      const responseUser = await userController.updatechuckerById(
-        element,
-        args,
-      );
+      const responseUser = await userController.updatechuckerById(element, args);
       const argsSerivce = { chucker: element, services };
-      const chuckerServices = await chuckerServiceController.addServices(
-        argsSerivce,
-      );
+      const chuckerServices = await chuckerServiceController.addServices(argsSerivce);
 
       res.json({ chuckerServices, responseUser });
     }),
@@ -95,17 +87,6 @@ router
       res.json(response);
     }),
   );
-
-router.get(
-  "/:element",
-  verifyToken,
-  verifyAdmin,
-  exceptionHandler(async (req: Request, res: Response) => {
-    const { element } = req.params;
-    const response = await elementController.getElementById(element);
-    res.json(response);
-  }),
-);
 
 router.put(
   "/upload-pictures",
@@ -236,11 +217,7 @@ router.put(
       type: "Point",
       coordinates: coordinates,
     };
-    if (
-      !coordinates ||
-      !Array.isArray(coordinates) ||
-      coordinates.length !== 2
-    ) {
+    if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
       throw new Error("Invalid coordinates provided.");
     }
 
@@ -252,6 +229,17 @@ router.put(
     };
     const response = await serviceAreaController.addElement(args);
 
+    res.json(response);
+  }),
+);
+
+router.get(
+  "/myprofile",
+  verifyToken,
+  verifyAdmin,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const user = req.user._id;
+    const response = await elementController.getElementById(user.toString());
     res.json(response);
   }),
 );
