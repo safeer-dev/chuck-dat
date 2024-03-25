@@ -27,6 +27,7 @@ export enum PAYMENT_ACCOUNT_TYPES {
 
 export enum NOTIFICATION_TYPES {
   NEW_MESSAGE = "new_message",
+  CUSTOM = "custom",
 }
 
 export enum USER_STATUSES {

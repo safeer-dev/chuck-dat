@@ -8,11 +8,7 @@ import * as userController from "../user/controller";
 import { Element } from "./interface";
 import { MongoID } from "../../configs/types";
 import { ErrorHandler } from "../../middlewares/error-handler";
-import {
-  GetNotificationsDTO,
-  NotifyUsersDTO,
-  sendNotificationsDTO,
-} from "./dto";
+import { GetNotificationsDTO, NotifyUsersDTO, sendNotificationsDTO } from "./dto";
 import {
   NOTIFICATION_STATUSES,
   NOTIFICATION_TYPES,
@@ -168,7 +164,7 @@ export const readNotifications = async (user: MongoID): Promise<void> => {
  * @param {Object} params notification parameters
  */
 export const sendNewMessageNotification = async (
-  params: sendNotificationsDTO
+  params: sendNotificationsDTO,
 ): Promise<void> => {
   const { username, notificationData, conversationData, messageData } = params;
   await notifyUsers({

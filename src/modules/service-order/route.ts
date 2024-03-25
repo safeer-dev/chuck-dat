@@ -11,6 +11,7 @@ import { SERVICE_ORDER_FEEDBACK } from "../../configs/enum";
 import { SERVICE_ORDER_STATUS } from "../../configs/enum";
 import { EXTRA_CHARGES_REQUEST_STATUS } from "../../configs/enum";
 import { IRequest } from "../../configs/types";
+import SocketManager from "../../utils/socket-manager";
 
 const { COMPLETED } = SERVICE_ORDER_STATUS;
 const { AWAITING, REJECTED, APPROVED } = SERVICE_ORDER_FEEDBACK;
@@ -214,12 +215,19 @@ router.put(
     const args = { status };
     element = element?.toString() || "";
     const response = await extraChargesController.updateElementById(element, args);
+    // const totalPayment = +response.amount;
     const arg = { extraChargesStatus: CONFIRMED };
     const serviceOrder = response.serviceOrder;
+
     const responseServiceOrder = await elementController.updateElementById(
       serviceOrder,
       arg,
     );
+    await new SocketManager().emitEvent({
+      to: responseServiceOrder.chucker.toString(),
+      event: "reminder",
+      data: responseServiceOrder,
+    });
     res.json({ response, responseServiceOrder });
   }),
 );
