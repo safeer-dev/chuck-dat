@@ -9,12 +9,7 @@ import { Element } from "./interface";
 import { MongoID } from "../../configs/types";
 import { USER_TYPES } from "../../configs/enum";
 import { ErrorHandler } from "../../middlewares/error-handler";
-import {
-  GetUsersDTO,
-  getUserDTO,
-  getUserProfileDTO,
-  updateUserDTO,
-} from "./dto";
+import { GetUsersDTO, getUserDTO, getUserProfileDTO, updateUserDTO } from "./dto";
 
 // destructuring assignments
 const { ADMIN } = USER_TYPES;
@@ -37,13 +32,9 @@ export const addElement = async (elementObj: Element) => {
  * @param {Object} elementObj element data
  * @returns {Object} element data
  */
-export const updateElementById = async (
-  user: MongoID,
-  userObj: updateUserDTO,
-) => {
+export const updateElementById = async (user: MongoID, userObj: updateUserDTO) => {
   if (!user) throw new ErrorHandler("Please enter user id!", 400);
-  if (!isValidObjectId(user))
-    throw new ErrorHandler("Please enter valid user id!", 400);
+  if (!isValidObjectId(user)) throw new ErrorHandler("Please enter valid user id!", 400);
   const {
     password,
     firstName,
@@ -57,8 +48,7 @@ export const updateElementById = async (
   } = userObj;
 
   if (!user) throw new ErrorHandler("Please enter user id!", 400);
-  if (!isValidObjectId(user))
-    throw new ErrorHandler("Please enter valid user id!", 400);
+  if (!isValidObjectId(user)) throw new ErrorHandler("Please enter valid user id!", 400);
 
   let userExists: any = await ElementModel.findById(user);
   if (!userExists) throw new ErrorHandler("Element not found!", 404);
@@ -76,30 +66,23 @@ export const updateElementById = async (
           element.token = fcm.token;
         }
       });
-      if (!alreadyExists)
-        userExists.fcms.push({ device: fcm.device, token: fcm.token });
-    } else
-      throw new ErrorHandler("Please enter FCM token and device both!", 400);
+      if (!alreadyExists) userExists.fcms.push({ device: fcm.device, token: fcm.token });
+    } else throw new ErrorHandler("Please enter FCM token and device both!", 400);
   }
   if (shallRemoveFCM)
     if (device)
       userExists.fcms = userExists.fcms.filter(
         (element: any) => element?.device !== device,
       );
-  if (firstName || lastName)
-    userExists.name = (firstName || "") + " " + (lastName || "");
+  if (firstName || lastName) userExists.name = (firstName || "") + " " + (lastName || "");
   if (image) {
     if (userExists.image) new FilesRemover().remove([userExists.image]);
     userExists.image = image;
   }
   if (coordinates) {
-    if (coordinates?.length === 2)
-      userExists.location.coordinates = coordinates;
+    if (coordinates?.length === 2) userExists.location.coordinates = coordinates;
     else
-      throw new ErrorHandler(
-        "Please enter location longitude and latitude both!",
-        400,
-      );
+      throw new ErrorHandler("Please enter location longitude and latitude both!", 400);
   }
   if (profile)
     if (await profileController.checkElementExistence({ _id: profile })) {
@@ -107,13 +90,9 @@ export const updateElementById = async (
     } else throw new ErrorHandler("Profile not found!", 404);
 
   userExists = { ...userExists._doc, ...userObj };
-  userExists = await ElementModel.findByIdAndUpdate(
-    userExists._id,
-    userExists,
-    {
-      new: true,
-    },
-  ).select("-createdAt -updatedAt -__v");
+  userExists = await ElementModel.findByIdAndUpdate(userExists._id, userExists, {
+    new: true,
+  }).select("-createdAt -updatedAt -__v");
   if (!userExists) throw new ErrorHandler("user not found!", 404);
   return userExists;
 };
@@ -251,14 +230,11 @@ export const checkElementExistence = async (query: Partial<Element>) => {
  * @returns {Object} user data
  */
 export const getUserProfile = async (params: getUserProfileDTO) => {
-  const { user, device } = params;
+  const { user } = params;
   const userExists: any = await ElementModel.findById(user).select(
     "-createdAt -updatedAt -__v",
   );
-  userExists.fcms.forEach((element: any) => {
-    if (element?.device === device) userExists._doc.fcm = element?.token;
-  });
-  delete userExists._doc.fcms;
+
   return userExists;
 };
 
@@ -267,8 +243,7 @@ export const updatechuckerById = async (
   elementObj: Partial<Element>,
 ) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id ||| 400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id ||| 400");
   const elementExists = await ElementModel.findOneAndUpdate(
     { chucker: element },
     elementObj,

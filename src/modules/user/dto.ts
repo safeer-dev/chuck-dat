@@ -24,5 +24,5 @@ export type getUserDTO = {
 
 export type getUserProfileDTO = {
   user: MongoID;
-  device: string;
+  device?: string;
 };

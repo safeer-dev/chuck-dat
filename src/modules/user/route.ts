@@ -87,6 +87,7 @@ router.put(
     res.json(response);
   }),
 );
+
 router.put(
   "/password",
   verifyToken,
@@ -145,13 +146,14 @@ router
   );
 
 router.get(
-  "/me",
+  "/customer/profile",
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: IRequest, res: Response) => {
-    const { _id: user } = req.user;
-    const { device } = req.query;
-    const args = { user, device: device?.toString() || "" };
+    const user = req.user._id;
+    // const { device } = req.query;
+    console.log("user...................", user);
+    const args = { user };
     const response = await userController.getUserProfile(args);
     res.json(response);
   }),
