@@ -192,6 +192,97 @@ export const getElements = async (params: GetElementsDTO) => {
   return { data: [], totalCount: 0, totalPages: 0, ...result };
 };
 
+//  export const getOrderRequests = async (params: GetElementsDTO) => {
+//    let { limit, page, chucker, customerLocation, chuckerServiceRadius, zipCodes } =
+//      params;
+//    page = page - 1 || 0;
+//    limit = limit || 10;
+
+//    const result = await ElementModel.aggregate([
+//      {
+//        $geoNear: {
+//          near: {
+//            type: "Point",
+//            coordinates: customerLocation,
+//          },
+//          distanceField: "distance",
+//          maxDistance: chuckerServiceRadius,
+//          spherical: true,
+//          query: {
+//            decliners: { $nin: [new mongoose.Types.ObjectId(chucker)] },
+//          },
+//        },
+//      },
+//      {
+//        $match: {
+//          "address.zipCode": { $in: zipCodes }, // Filter by customer location zip codes
+//        },
+//      },
+//      { $sort: { createdAt: -1 } },
+//      { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+//      {
+//        $lookup: {
+//          from: "services",
+//          localField: "service",
+//          foreignField: "_id",
+//          as: "serviceLookup",
+//        },
+//      },
+//      { $unwind: { path: "$serviceLookup", preserveNullAndEmptyArrays: true } },
+//      {
+//        $addFields: {
+//          serviceId: "$service",
+//          serviceName: "$serviceLookup.name",
+//          amount: "$serviceLookup.charges",
+//        },
+//      },
+//      {
+//        $lookup: {
+//          from: "customer-locations",
+//          localField: "location",
+//          foreignField: "_id",
+//          as: "address",
+//        },
+//      },
+//      { $unwind: { path: "$address", preserveNullAndEmptyArrays: true } },
+//      {
+//        $facet: {
+//          totalCount: [{ $count: "totalCount" }],
+//          data: [
+//            { $skip: page * limit },
+//            { $limit: limit },
+//            {
+//              $project: {
+//                service: "$serviceId",
+//                amount: 1,
+//                serviceName: 1,
+//                lotSize: 1,
+//                notes: 1,
+//                subServices: 1,
+//                location: "$address",
+//                image: 1,
+//                status: 1,
+//                isAssigned: 1,
+//                name: 1,
+//                customer: 1,
+//              },
+//            },
+//          ],
+//        },
+//      },
+//      { $unwind: "$totalCount" },
+//      {
+//        $project: {
+//          totalCount: "$totalCount.totalCount",
+//          totalPages: { $ceil: { $divide: ["$totalCount.totalCount", limit] } },
+//          data: 1,
+//        },
+//      },
+//    ]);
+
+//    return { data: [], totalCount: 0, totalPages: 0, ...(result[0] || {}) }; // result[0] because result is an array with one element
+//  };
+
 export const getOrderRequests = async (params: GetElementsDTO) => {
   let { limit, page, chucker } = params;
   page = page - 1 || 0;
@@ -200,9 +291,10 @@ export const getOrderRequests = async (params: GetElementsDTO) => {
   const result = await ElementModel.aggregate([
     {
       $match: {
-        decliners: { $nin: [new mongoose.Types.ObjectId(chucker)] }, // Exclude documents where chuckerId is in decliners array
+        decliners: { $nin: [new mongoose.Types.ObjectId(chucker)] },
       },
     },
+
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
     {

@@ -32,10 +32,8 @@ router.use("/sub-service", subService);
 router.use("/service-request", serviceRequest);
 router.use("/service-offers", serviceOffers);
 router.use("/service-orders", serviceOrders);
-
 router.use("/chucker", chucker);
 router.use("/customer-location", customerLocation);
-
 router.use("/docs", (_req: Request, res: Response) => res.redirect(POSTMAN_URL || ""));
 
 export default router;
