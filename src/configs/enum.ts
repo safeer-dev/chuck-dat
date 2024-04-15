@@ -84,6 +84,17 @@ export enum SERVICE_ORDER_OFFER {
   CANCELLED = "cancelled",
 }
 
+export enum PROFILE_STATUS {
+  BASIC_REGISTRATION = "basic-registeration",
+  PROFILE_COMPLETION = "profile-completion",
+  PHONE_VERIFICATION = "phone-verification",
+  PICTURES_UPLOADING = "pictures-uploading",
+  LOCATION_ADDITION = "location-addition",
+  IDENTITY_VERIFICATION = "identity-verification",
+  SERVICE_AREAS_SELECTION = "service-areas-selection",
+  W9_FORM_FILLING = "w9-form-filling",
+}
+
 export enum NOTIFICATION_TYPES {
   NEW_MESSAGE = "new_message",
   NEW_ORDER_REQUEST = "new_order_request",

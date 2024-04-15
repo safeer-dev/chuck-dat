@@ -5,7 +5,6 @@ import express, { Request, Response } from "express";
 import * as elementController from "./controller";
 import * as chuckerServiceController from "../chucker-service/controller";
 import * as userController from "../user/controller";
-import * as serviceAreaController from "../service-area/controller";
 import { exceptionHandler } from "../../middlewares/exception-handler";
 import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenticator";
 import { PUBLIC_DIRECTORY } from "../../configs/directories";
@@ -35,58 +34,48 @@ router.get(
   }),
 );
 
-router
-  .route("/complete-profile")
-  .all(verifyToken, verifyUser)
-  // .post(
-  //   exceptionHandler(async (req: Request, res: Response) => {
-  //     const { title } = req.body;
-  //     const args = { title };
-  //     const response = await elementController.addElement(args);
-  //     res.json(response);
-  //   })
-  // )
-  .put(
-    exceptionHandler(async (req: Request, res: Response) => {
-      let { element } = req.query;
-      const { firstName, lastName, phone, services } = req.body;
+router.put(
+  "/complete-profile",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let element = req.user._id;
+    const { authStepCompleted } = req.query;
+    const { firstName, lastName, phone, services } = req.body;
 
-      const args = {
-        firstName,
-        lastName,
-        phone,
-      };
+    const args = {
+      firstName,
+      lastName,
+      phone,
+      authStepCompleted,
+    };
 
-      element = element?.toString() || "";
-      const responseUser = await userController.updatechuckerById(element, args);
-      const argsSerivce = { chucker: element, services };
-      const chuckerServices = await chuckerServiceController.addServices(argsSerivce);
+    element = element?.toString() || "";
+    const responseUser = await userController.updatechuckerById(element, args);
+    const argsSerivce = { chucker: element, services };
+    const chuckerServices = await chuckerServiceController.addServices(argsSerivce);
 
-      res.json({ chuckerServices, responseUser });
-    }),
-  )
-  .get(
-    exceptionHandler(async (req: Request, res: Response) => {
-      const { page, limit } = req.query;
-      let { keyword } = req.query;
-      keyword = keyword?.toString() || "";
-      const args = {
-        keyword,
-        limit: Number(limit),
-        page: Number(page),
-      };
-      const response = await elementController.getElements(args);
-      res.json(response);
-    }),
-  )
-  .delete(
-    exceptionHandler(async (req: Request, res: Response) => {
-      let { element } = req.query;
-      element = element?.toString() || "";
-      const response = await elementController.deleteElementById(element);
-      res.json(response);
-    }),
-  );
+    res.json({ chuckerServices, responseUser });
+  }),
+);
+
+router.put(
+  "/verify-phone",
+  verifyToken,
+  verifyUser,
+  // upload().single("image"),
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let user = req.user._id;
+
+    const { otp } = req.body;
+    const args = {
+      otp,
+      user,
+    };
+    const response = await userController.verifyPhone(args);
+    res.json(response);
+  }),
+);
 
 router.put(
   "/upload-pictures",
@@ -96,8 +85,10 @@ router.put(
   // uploadTemporary.single("image"),
   // uploadTemporary.single("Media"),
   // uploadTemporary.single("faceImage"),
-  exceptionHandler(async (req: Request, res: Response) => {
-    let { element } = req.query;
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let element = req.user._id;
+    const { authStepCompleted } = req.query;
+
     const { faceImage, image, equipmentMedia } = req.body;
     // const faceImage = req.file;
     // const image = req.file;
@@ -113,6 +104,7 @@ router.put(
       equipmentMedia,
       // : equipmentMedia?.filename,
       image,
+      authStepCompleted,
       // : image?.filename,
     };
     const response = await elementController.updateElementById(element, args);
@@ -126,8 +118,10 @@ router.put(
   "/upload-location",
   verifyToken,
   verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    let { element } = req.query;
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let element = req.user._id;
+    const { authStepCompleted } = req.query;
+
     element = element?.toString() || "";
 
     const { street, city, state, country, zipCode, coordinates } = req.body;
@@ -144,7 +138,7 @@ router.put(
       throw new Error("Invalid coordinates provided.");
     }
 
-    const args = { street, city, state, country, zipCode, location };
+    const args = { street, city, state, country, zipCode, location, authStepCompleted };
     const response = await userController.updatechuckerById(element, args);
     res.json(response);
   }),
@@ -177,57 +171,37 @@ router.put(
   }),
 );
 
-// router.put(
-//   "/upload-identity",
-//   verifyToken,
-//   verifyUser,
-//   // uploadTemporary.single(" idCard"),
-//   // uploadTemporary.single("drivingLicense"),
-//   exceptionHandler(async (req: Request, res: Response) => {
-//     let { element } = req.query;
-//     const { drivingLicense, idCard } = req.body;
-//     // const drivingLicense = req.file;
-//     // const idCard = req.file;
-
-//     element = element?.toString() || "";
-//     // let mediaPaths;
-//     // if (equipmentMedia){
-//         // mediaPaths = equipmentMedia.map((file: any) => file.filename);
-//     // }
-//     const args = {
-//       idCard,
-//       drivingLicense,
-//     };
-//     const response = await elementController.updateElementById(element, args);
-
-//     res.json(response);
-//   }),
-// );
-
 router.put(
   "/upload-service-areas",
   verifyToken,
   verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    let { element } = req.query;
-    const { zipCodes, coordinates, radius } = req.body;
-    element = element?.toString() || "";
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { authStepCompleted } = req.query;
 
+    const user = req.user._id;
+    const element = user.toString();
+    const { ServiceRadius, ServiceZipCodes, coordinates } = req.body;
+
+    const parsedCoordinates = JSON.parse(coordinates);
     const location = {
       type: "Point",
-      coordinates: coordinates,
+      coordinates: parsedCoordinates,
     };
-    if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+    if (
+      !parsedCoordinates ||
+      !Array.isArray(parsedCoordinates) ||
+      parsedCoordinates.length !== 2
+    ) {
       throw new Error("Invalid coordinates provided.");
     }
 
     const args = {
-      chucker: element,
-      zipCodes,
-      location,
-      radius,
+      ServiceRadius,
+      ServiceZipCodes,
+      Servicelocation: location,
+      authStepCompleted,
     };
-    const response = await serviceAreaController.addElement(args);
+    const response = await elementController.updateElementById(element, args);
 
     res.json(response);
   }),
@@ -245,11 +219,3 @@ router.get(
 );
 
 export default router;
-
-// const promises = hashtags.map(async (tag: any) => {
-//   const arga = { post: response._id, hashtag: tag };
-//   const hashTag = await hashtagcontroller.addElement(arga);
-//   return hashTag;
-// });
-
-// const results = await Promise.all(promises);

@@ -4,12 +4,18 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 // file imports
-import { USER_STATUSES, USER_TYPES, GEO_JSON_TYPES } from "../../configs/enum";
+import {
+  USER_STATUSES,
+  USER_TYPES,
+  GEO_JSON_TYPES,
+  PROFILE_STATUS,
+} from "../../configs/enum";
 
 // destructuring assignments
 const { ACTIVE } = USER_STATUSES;
 const { SUPER_ADMIN } = USER_TYPES;
 const { POINT } = GEO_JSON_TYPES;
+const { BASIC_REGISTRATION } = PROFILE_STATUS;
 
 // variable initializations
 const Schema = mongoose.Schema;
@@ -106,6 +112,11 @@ const userSchema = new Schema(
       default: false,
       select: false,
     },
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     lastLogin: {
       type: Date,
       select: false,
@@ -165,6 +176,12 @@ const userSchema = new Schema(
     state: { type: String },
     country: { type: String },
     zipCode: { type: String },
+    authStepCompleted: {
+      type: String,
+      enum: PROFILE_STATUS,
+      default: BASIC_REGISTRATION,
+      required: true,
+    },
   },
   {
     timestamps: true,

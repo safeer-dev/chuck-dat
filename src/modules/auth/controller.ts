@@ -35,17 +35,21 @@ export const register = async (params: User) => {
   const { type } = params;
   const user = await userController.addElement(params);
 
-  const profileObj = { user: user._id };
+  const profileObj: any = { user: user._id };
   const userObj: any = {};
   userObj.type = type;
 
   if (type === CUSTOMER) {
     userObj.customer = (await customerController.addElement(profileObj))._id;
+    userObj.isCustomer = true;
     // emailVerifyEmail(user.email);
   } else if (type === ADMIN) {
     userObj.admin = (await adminController.addElement(profileObj))._id;
+    userObj.isAdmin = true;
   } else if (type === CHUCKER) {
     userObj.chucker = (await chuckerController.addElement(profileObj))._id;
+    userObj.isChucker = true;
+
     // emailVerifyEmail(user.email);
   }
   await userController.updateElementById(user._id, userObj);

@@ -252,3 +252,20 @@ export const updatechuckerById = async (
   if (!elementExists) throw new Error("element not found ||| 404");
   return elementExists;
 };
+
+export const verifyPhone = async (params: any) => {
+  const { user, otp } = params;
+
+  const userExists: any = await ElementModel.findById(user);
+  if (!userExists) {
+    throw new ErrorHandler("user not found!", 400);
+  }
+  if (userExists.otp === otp) {
+    userExists.phoneVerified = true;
+    userExists.otp = null;
+    await userExists.save();
+    return userExists;
+  } else {
+    throw new ErrorHandler("otp does not match!", 400);
+  }
+};

@@ -176,15 +176,36 @@ router.put(
   verifyUser,
   // upload().single("image"),
   exceptionHandler(async (req: IRequest, res: Response) => {
-    const user = req.user._id;
+    let element = req.user._id;
+    const { authStepCompleted } = req.query;
+
     const { firstName, lastName, image, phone } = req.body;
     const args = {
       firstName,
       lastName,
       image,
       phone,
+      authStepCompleted,
     };
-    const response = await userController.updateElementById(user, args);
+    const response = await userController.updateElementById(element, args);
+    res.json(response);
+  }),
+);
+
+router.put(
+  "/customer/verify-phone",
+  verifyToken,
+  verifyUser,
+  // upload().single("image"),
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let user = req.user._id;
+
+    const { otp } = req.body;
+    const args = {
+      otp,
+      user,
+    };
+    const response = await userController.verifyPhone(args);
     res.json(response);
   }),
 );

@@ -1,7 +1,10 @@
 // module imports
 import mongoose from "mongoose";
+import { GEO_JSON_TYPES } from "../../configs/enum";
 
 // variable initializations
+const { POINT } = GEO_JSON_TYPES;
+
 const Schema = mongoose.Schema;
 const model = mongoose.model;
 
@@ -39,6 +42,29 @@ const serviceProviderSchema = new Schema(
       default: false,
       select: false,
       // required: true,
+    },
+    ServiceZipCodes: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    ServiceRadius: {
+      type: Number,
+    },
+    Servicelocation: {
+      type: {
+        type: String,
+
+        enum: Object.values(GEO_JSON_TYPES),
+        default: POINT,
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        default: [0, 0],
+        required: true,
+      },
     },
   },
   {

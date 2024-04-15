@@ -8,4 +8,6 @@ export interface Element {
   drivingLicense?: string;
   idCard?: string;
   equipmentMedia?: any;
+  ServiceRadius: any;
+  ServiceZipCodes: any;
 }
