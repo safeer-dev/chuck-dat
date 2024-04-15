@@ -27,16 +27,13 @@ export const addElement = async (elementObj: Element) => {
  */
 export const updateElementById = async (
   element: string,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
-  const elementExists = await ElementModel.findByIdAndUpdate(
-    element,
-    elementObj,
-    { new: true }
-  );
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
+  const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
+    new: true,
+  });
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
 };
@@ -49,7 +46,7 @@ export const updateElementById = async (
  */
 export const updateElement = async (
   query: Partial<Element>,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!query || Object.keys(query).length === 0)
     throw new Error("Please enter query!|||400");
@@ -67,8 +64,7 @@ export const updateElement = async (
  */
 export const deleteElementById = async (element: string) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findByIdAndDelete(element);
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -94,10 +90,9 @@ export const deleteElement = async (query: Partial<Element>) => {
  */
 export const getElementById = async (element: string) => {
   if (!element) throw new Error("Please enter element id!|||400");
-  if (!isValidObjectId(element))
-    throw new Error("Please enter valid element id!|||400");
+  if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
   const elementExists = await ElementModel.findById(element).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;
@@ -112,7 +107,7 @@ export const getElement = async (query: Partial<Element>) => {
   if (!query || Object.keys(query).length === 0)
     throw new Error("Please enter query!|||400");
   const elementExists = await ElementModel.findOne(query).select(
-    "-createdAt -updatedAt -__v"
+    "-createdAt -updatedAt -__v",
   );
   if (!elementExists) throw new Error("element not found!|||404");
   return elementExists;

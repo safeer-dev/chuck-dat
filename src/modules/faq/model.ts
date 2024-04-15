@@ -6,8 +6,8 @@ const Schema = mongoose.Schema;
 const model = mongoose.model;
 
 const elementSchema = new Schema(
-  { title: { type: String } },
-  { timestamps: true }
+  { question: { type: String }, answer: { type: String } },
+  { timestamps: true },
 );
 
-export default model("elements", elementSchema);
+export default model("faqs", elementSchema);
