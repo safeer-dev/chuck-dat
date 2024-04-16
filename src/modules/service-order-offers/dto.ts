@@ -1,7 +1,8 @@
 import { MongoID } from "../../configs/types";
 
 export type GetElementsDTO = {
-  customer: MongoID;
+  customer?: MongoID;
+  chucker?: any;
   limit: number;
   page: number;
   keyword?: string;

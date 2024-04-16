@@ -88,6 +88,7 @@ router.put(
   }),
 );
 
+//change password
 router.put(
   "/password",
   verifyToken,
@@ -151,10 +152,7 @@ router.get(
   verifyUser,
   exceptionHandler(async (req: IRequest, res: Response) => {
     const user = req.user._id;
-    // const { device } = req.query;
-    console.log("user...................", user);
-    const args = { user };
-    const response = await userController.getUserProfile(args);
+    const response = await userController.getUserProfile(user);
     res.json(response);
   }),
 );

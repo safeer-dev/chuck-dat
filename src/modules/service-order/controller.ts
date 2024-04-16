@@ -281,41 +281,24 @@ export const getCustomerCurrentOrders = async (params: GetCustomerOrdersDTO) => 
 
   query.status = { $in: ["confirmed", "in progress"] };
 
-  const [currentOrdersResult, pendingOrderRequests] = await Promise.all([
-    ElementModel.aggregate([
-      { $match: query },
-      { $sort: { createdAt: -1 } },
-      { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
-      {
-        $facet: {
-          totalCount: [{ $count: "totalCount" }],
-          data: [{ $skip: page * limit }, { $limit: limit }],
-        },
+  const result = await ElementModel.aggregate([
+    { $match: query },
+    { $sort: { createdAt: -1 } },
+    { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
+    {
+      $facet: {
+        totalCount: [{ $count: "totalCount" }],
+        data: [{ $skip: page * limit }, { $limit: limit }],
       },
-      { $unwind: "$totalCount" },
-      {
-        $project: {
-          totalCount: "$totalCount.totalCount",
-          totalPages: { $ceil: { $divide: ["$totalCount.totalCount", limit] } },
-          data: 1,
-        },
+    },
+    { $unwind: "$totalCount" },
+    {
+      $project: {
+        totalCount: "$totalCount.totalCount",
+        totalPages: { $ceil: { $divide: ["$totalCount.totalCount", limit] } },
+        data: 1,
       },
-    ]),
-
-    orderRequestController.getPendingOrderRequest(customer),
+    },
   ]);
-
-  const mergedResult = {
-    data: [],
-    totalCount: 0,
-    totalPages: 0,
-    ...currentOrdersResult[0],
-  };
-
-  mergedResult.data = [...mergedResult.data, ...pendingOrderRequests];
-
-  mergedResult.totalCount += pendingOrderRequests.length;
-  mergedResult.totalPages = Math.ceil(mergedResult.totalCount / limit);
-
-  return mergedResult;
+  return result;
 };

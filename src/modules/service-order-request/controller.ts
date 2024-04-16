@@ -417,7 +417,7 @@ export const addDecliner = async (element: string, chucker_id: any) => {
   if (!element) throw new Error("Please enter element id!|||400");
   if (!isValidObjectId(element)) throw new Error("Please enter valid element id!|||400");
 
-  const elementExists = await ElementModel.findByIdAndUpdate(
+  const elementExists: any = await ElementModel.findByIdAndUpdate(
     element,
     { $push: { decliners: chucker_id } },
     { new: true },

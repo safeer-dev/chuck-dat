@@ -38,50 +38,6 @@ router.get(
   }),
 );
 
-router
-  .route("/admin")
-  .all(verifyToken, verifyAdmin)
-  .post(
-    exceptionHandler(async (req: Request, res: Response) => {
-      const { customer } = req.body;
-      const args = { customer };
-      const response = await elementController.addElement(args);
-      res.json(response);
-    }),
-  )
-  .put(
-    exceptionHandler(async (req: Request, res: Response) => {
-      let { element } = req.query;
-      const { customer } = req.body;
-      const args = { customer };
-      element = element?.toString() || "";
-      const response = await elementController.updateElementById(element, args);
-      res.json(response);
-    }),
-  )
-  .get(
-    exceptionHandler(async (req: Request, res: Response) => {
-      const { page, limit } = req.query;
-      let { keyword } = req.query;
-      keyword = keyword?.toString() || "";
-      const args = {
-        keyword,
-        limit: Number(limit),
-        page: Number(page),
-      };
-      const response = await elementController.getElements(args);
-      res.json(response);
-    }),
-  )
-  .delete(
-    exceptionHandler(async (req: Request, res: Response) => {
-      let { element } = req.query;
-      element = element?.toString() || "";
-      const response = await elementController.deleteElementById(element);
-      res.json(response);
-    }),
-  );
-
 router.get(
   "/:element",
   verifyToken,
@@ -335,7 +291,7 @@ router.get(
       limit: Number(limit),
       page: Number(page),
     };
-    const response = await elementController.getCustomerCurrentOrders(args);
+    const response = await elementController.getCustomerPreviousOrders(args);
     res.json(response);
   }),
 );

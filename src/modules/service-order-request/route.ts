@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 
 // file imports
 import * as elementController from "./controller";
+import * as serviceOrderOfferController from "../service-order-offers/controller";
 import { exceptionHandler } from "../../middlewares/exception-handler";
 import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenticator";
 import { IRequest } from "../../configs/types";
@@ -101,6 +102,7 @@ router.get(
   }),
 );
 
+//get order requests for chuckers
 router.get(
   "/chucker/all",
   verifyToken,
@@ -132,6 +134,39 @@ router.get(
       requestId,
     };
     const response = await elementController.getOrderRequest(args);
+    res.json(response);
+  }),
+);
+
+router.put(
+  "/chucker/decline-service-request",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { serviceRequest } = req.body;
+    const chucker = req.user._id;
+    const args = {
+      chucker,
+    };
+    const response = await elementController.addDecliner(serviceRequest, chucker);
+    res.json(response);
+  }),
+);
+
+router.post(
+  "/chucker/accept-service-request",
+  verifyToken,
+  verifyUser,
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    const { serviceRequest, customer, date } = req.body;
+    const chucker = req.user._id;
+    const args = {
+      chucker,
+      serviceRequest,
+      customer,
+      date,
+    };
+    const response = await serviceOrderOfferController.addElement(args);
     res.json(response);
   }),
 );

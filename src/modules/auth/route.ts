@@ -24,8 +24,8 @@ const router = express.Router();
 router.post(
   "/register/customer",
   exceptionHandler(async (req: Request, res: Response) => {
-    const { email, password, name } = req.body;
-    const args = { email, password, name, type: CUSTOMER };
+    const { email, password } = req.body;
+    const args = { email, password, type: CUSTOMER };
     const response = await authController.register(args);
     const Email = await authController.emailVerifyEmail({ email: email });
     res.json({ token: response, Email });

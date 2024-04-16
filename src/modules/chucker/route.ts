@@ -34,6 +34,8 @@ router.get(
   }),
 );
 
+//auth
+
 router.put(
   "/complete-profile",
   verifyToken,
@@ -107,7 +109,7 @@ router.put(
       authStepCompleted,
       // : image?.filename,
     };
-    const response = await elementController.updateElementById(element, args);
+    const response = await elementController.updateElement({ user: element }, args);
     const updateUser = await userController.updatechuckerById(element, args);
 
     res.json({ response, updateUser });
@@ -165,7 +167,7 @@ router.put(
       idCard,
       drivingLicense,
     };
-    const response = await elementController.updateElementById(element, args);
+    const response = await elementController.updateElement({ user: element }, args);
 
     res.json(response);
   }),
@@ -201,7 +203,34 @@ router.put(
       Servicelocation: location,
       authStepCompleted,
     };
-    const response = await elementController.updateElementById(element, args);
+    const response = await elementController.updateElement({ user: element }, args);
+
+    res.json(response);
+  }),
+);
+
+router.put(
+  "/upload-w9-form",
+  verifyToken,
+  verifyUser,
+  // uploadTemporary.single("form"),
+  exceptionHandler(async (req: IRequest, res: Response) => {
+    let { authStepCompleted } = req.query;
+    let user = req.user._id;
+    const { drivingLicense, idCard } = req.body;
+    // const drivingLicense = req.file;
+    // const idCard = req.file;
+
+    user = user?.toString() || "";
+    // let mediaPaths;
+    // if (equipmentMedia){
+    //     mediaPaths = equipmentMedia.map((file: any) => file.filename);
+    // }
+    const args = {
+      idCard,
+      drivingLicense,
+    };
+    const response = await elementController.updateElement({ user: user }, args);
 
     res.json(response);
   }),

@@ -4,11 +4,7 @@ import express, { Request, Response } from "express";
 // file imports
 import * as elementController from "./controller";
 import { exceptionHandler } from "../../middlewares/exception-handler";
-import {
-  verifyToken,
-  verifyAdmin,
-  verifyUser,
-} from "../../middlewares/authenticator";
+import { verifyToken, verifyAdmin, verifyUser } from "../../middlewares/authenticator";
 
 // destructuring assignments
 

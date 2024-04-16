@@ -229,8 +229,7 @@ export const checkElementExistence = async (query: Partial<Element>) => {
  * @param {Object} params user fetching parameters
  * @returns {Object} user data
  */
-export const getUserProfile = async (params: getUserProfileDTO) => {
-  const { user } = params;
+export const getUserProfile = async (user: MongoID) => {
   const userExists: any = await ElementModel.findById(user).select(
     "-createdAt -updatedAt -__v",
   );
