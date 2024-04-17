@@ -45,49 +45,49 @@ export const updateElementById = async (
     new: true,
   });
   if (!elementExists) throw new ErrorHandler("element not found!", 404);
-  // if (elementExists) {
-  //   const serviceOrder = await serviceOrderController.getElementById(
-  //     elementExists.serviceOrder.toString(),
-  //   );
-  //   if (status == CONFIRMED) {
-  //     const notificationObj = {
-  //       type: EXTRA_CHARGES_REQUEST_ACCEPTED,
-  //       user: serviceOrder.chucker,
-  //       socketData: serviceOrder,
-  //       event: `extraChargesRequestAccepted_${serviceOrder._id.toString()}`,
-  //       title: "extra charges Request Accepted",
-  //       body: `Your extra charges request has been accepted`,
-  //       notificationData: { user: serviceOrder.chucker, order: serviceOrder._id },
-  //       firebaseData: { order: serviceOrder._id.toString() },
-  //       useSocket: true,
-  //       useFirebase: true,
-  //       useDatabase: true,
-  //     };
+  if (elementExists) {
+    const serviceOrder = await serviceOrderController.getElementById(
+      elementExists.serviceOrder.toString(),
+    );
+    if (status == CONFIRMED) {
+      const notificationObj = {
+        type: EXTRA_CHARGES_REQUEST_ACCEPTED,
+        user: serviceOrder.chucker,
+        socketData: serviceOrder,
+        event: `extraChargesRequestAccepted_${serviceOrder._id.toString()}`,
+        title: "extra charges Request Accepted",
+        body: `Your extra charges request has been accepted`,
+        notificationData: { user: serviceOrder.chucker, order: serviceOrder._id },
+        firebaseData: { order: serviceOrder._id.toString() },
+        useSocket: true,
+        useFirebase: true,
+        useDatabase: true,
+      };
 
-  //     await notificationsController.notifyUsers(notificationObj);
-  //   } else if (status == REJECTED) {
-  //     //  await new SocketManager().emitEvent({
-  //     //    to: responseServiceOrder.chucker.toString(),
-  //     //    event: "",
-  //     //    data: responseServiceOrder,
-  //     //  });
-  //     const notificationObj = {
-  //       type: EXTRA_CHARGES_REQUEST_REJECTED,
-  //       user: serviceOrder.chucker,
-  //       socketData: serviceOrder,
-  //       event: `extraChargesRequestRejected_${serviceOrder._id.toString()}`,
-  //       title: "extra charges request rejected",
-  //       body: `Your extra charges request has been rejected`,
-  //       notificationData: { user: serviceOrder.chucker, order: serviceOrder._id },
-  //       firebaseData: { order: serviceOrder._id.toString() },
-  //       useSocket: true,
-  //       useFirebase: true,
-  //       useDatabase: true,
-  //     };
+      await notificationsController.extraChargesApprovedNotification(notificationObj);
+    } else if (status == REJECTED) {
+      //  await new SocketManager().emitEvent({
+      //    to: responseServiceOrder.chucker.toString(),
+      //    event: "",
+      //    data: responseServiceOrder,
+      //  });
+      const notificationObj = {
+        type: EXTRA_CHARGES_REQUEST_REJECTED,
+        user: serviceOrder.chucker,
+        socketData: serviceOrder,
+        event: `extraChargesRequestRejected_${serviceOrder._id.toString()}`,
+        title: "extra charges request rejected",
+        body: `Your extra charges request has been rejected`,
+        notificationData: { user: serviceOrder.chucker, order: serviceOrder._id },
+        firebaseData: { order: serviceOrder._id.toString() },
+        useSocket: true,
+        useFirebase: true,
+        useDatabase: true,
+      };
 
-  //     await notificationsController.notifyUsers(notificationObj);
-  //   }
-  // }
+      await notificationsController.extraChargesRejectedNotification(notificationObj);
+    }
+  }
   return elementExists;
 };
 

@@ -1,56 +1,26 @@
-// module imports
-
-// file imports
+import messagesModel from "../message/model";
+import notificationsModel from "../notification/model";
 import FirebaseManager from "../../utils/firebase-manager";
+import { NOTIFICATION_TYPES, MESSAGE_STATUSES } from "../../configs/enum";
 import SocketManager from "../../utils/socket-manager";
-import ElementModel from "./model";
-import * as userController from "../user/controller";
-import { Element } from "./interface";
-import { MongoID } from "../../configs/types";
-import { ErrorHandler } from "../../middlewares/error-handler";
-import { GetNotificationsDTO, NotifyUsersDTO, sendNotificationsDTO } from "./dto";
-import {
-  NOTIFICATION_STATUSES,
-  NOTIFICATION_TYPES,
-  SOCKET_EVENTS,
-} from "../../configs/enum";
-
-// destructuring assignments
-const { READ } = NOTIFICATION_STATUSES;
-const { NEW_MESSAGE_, CONVERSATIONS_UPDATED } = SOCKET_EVENTS;
-const { NEW_MESSAGE } = NOTIFICATION_TYPES;
+const { NEW_MESSAGE, CUSTOM } = NOTIFICATION_TYPES;
+const { UNREAD, READ } = MESSAGE_STATUSES;
 
 /**
- * @description Add element
- * @param {Object} elementObj element data
- * @returns {Object} element data
+ * Get user notifications
+ * @param {string} user user id
+ * @param {number} limit notifications limit
+ * @param {number} page notifications page number
+ * @returns {[object]} array of notifications
  */
-export const addElement = async (elementObj: Element) => {
-  return await ElementModel.create(elementObj);
-};
-
-/**
- * @description Add elements
- * @param {Object[]} elements elements data
- * @returns {Object} element data
- */
-export const addElements = async (elements: Element[]) => {
-  return await ElementModel.create(elements);
-};
-
-/**
- * @description Get elements
- * @param {Object} params elements fetching parameters
- * @returns {Object[]} elements data
- */
-export const getElements = async (params: GetNotificationsDTO) => {
+export const getAllNotifications = async (params: any) => {
   const { user } = params;
   let { page, limit } = params;
   const query: any = {};
   if (user) query.user = user;
   page = page - 1 || 0;
   limit = limit || 10;
-  const [result] = await ElementModel.aggregate([
+  const [result] = await notificationsModel.aggregate([
     { $match: query },
     { $sort: { createdAt: -1 } },
     { $project: { createdAt: 0, updatedAt: 0, __v: 0 } },
@@ -77,112 +47,446 @@ export const getElements = async (params: GetNotificationsDTO) => {
 };
 
 /**
- * @description notify users
- * @param {Object} params notify users parameters
+ * New message notification
+ * @param {string} message message id
+ * @returns {null}
  */
-export const notifyUsers = async (params: NotifyUsersDTO): Promise<void> => {
-  const {
-    query,
-    user,
-    socketData,
-    firebaseData,
-    event,
-    notificationData,
-    title,
-    body,
-    type,
-    isGrouped,
-    useFirebase,
-    useDatabase,
-    useSocket,
-  } = params;
+export const newMessageNotification = async (parameters: any) => {
+  const { message } = parameters;
+  const messageExists: any = await messagesModel
+    .findOne({ _id: message })
+    .populate("userTo userFrom");
+  if (!messageExists) {
+    throw new Error("Message not found!");
+  }
+  const title = "New Message";
+  const body = `New message from ${messageExists.userFrom.name}!`;
+  await notificationsModel.create({
+    type: NEW_MESSAGE,
+    text: body,
+    message: messageExists._id,
+    messenger: messageExists.userFrom,
+    user: messageExists.userTo,
+  });
+
+  const newNotifications = await notificationsModel
+    .find({ user: messageExists.userTo, status: UNREAD })
+    .count();
+
+  await new SocketManager().emitGroupEvent({
+    to: messageExists.userTo.toString(),
+    event: "newNotifications_" + messageExists.userTo._id.toString(),
+    data: newNotifications,
+  });
 
   const fcms: any = [];
-  let usersExist: any = [];
-
-  if (isGrouped) {
-    if (useFirebase) {
-      const queryObj: any = query ?? {};
-      queryObj.limit = Math.pow(2, 32);
-      const { data } = await userController.getElements(queryObj);
-      usersExist = data;
-      usersExist.forEach(async (element: any) => {
-        element.fcms.forEach((e: any) => fcms.push(e.token));
-      });
-    }
-    if (useSocket)
-      // socket event emission
-      await new SocketManager().emitGroupEvent({ event, data: socketData });
-  } else {
-    if (useFirebase) {
-      const userExists = await userController.getElementById(user || "");
-      userExists?.fcms.forEach((e: any) => fcms.push(e.token));
-    }
-    if (useSocket)
-      // socket event emission
-      await new SocketManager().emitEvent({
-        to: user,
-        event,
-        data: socketData,
-      });
-  }
-  if (useFirebase)
-    // firebase notification emission
-    await new FirebaseManager().multicast({
-      fcms,
-      title,
-      body,
-      data: firebaseData ? { ...firebaseData, type } : { type },
-    });
-  if (useDatabase)
-    if (notificationData) {
-      // database notification creation
-      if (type) notificationData.type = type;
-      if (isGrouped) {
-        const elements = usersExist?.map((element: any) => {
-          return { ...notificationData, user: element._id };
-        });
-        await addElements(elements);
-      } else await addElement(notificationData);
-    }
-};
-
-/**
- * @description read all notifications
- * @param {String} user user id
- */
-export const readNotifications = async (user: MongoID): Promise<void> => {
-  const notificationObj = { status: READ };
-  if (!user) throw new ErrorHandler("Please enter user id!", 400);
-  if (!(await userController.checkElementExistence({ _id: user })))
-    throw new ErrorHandler("Please enter valid user id!", 400);
-  await ElementModel.updateMany({ user }, notificationObj);
-};
-
-/**
- * @description send new message notification
- * @param {Object} params notification parameters
- */
-export const sendNewMessageNotification = async (
-  params: sendNotificationsDTO,
-): Promise<void> => {
-  const { username, notificationData, conversationData, messageData } = params;
-  await notifyUsers({
-    user: notificationData.user,
-    type: NEW_MESSAGE,
-    useSocket: true,
-    event: NEW_MESSAGE_ + messageData?.conversation,
-    socketData: messageData,
-    useFirebase: true,
-    title: "New Message",
-    body: `New message from ${username}`,
-    useDatabase: true,
-    notificationData,
+  messageExists.userTo.fcms.forEach(async (element: any) => {
+    fcms.push(element.token);
   });
-  await notifyUsers({
-    useSocket: true,
-    event: CONVERSATIONS_UPDATED,
-    socketData: conversationData,
-    user: notificationData.user,
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: {
+      type: NEW_MESSAGE,
+      // message: JSON.stringify(messageExists)
+    },
+  });
+};
+
+/**
+ * @description sends notifications to nearby chuckers
+ * @param {[string]} fcms user fcms
+ */
+export const newOrderRequestNotification = async (args: any) => {
+  const { fcms, type, order } = args;
+  const title = "New Order Request";
+  const body = "There is a new order request near you.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+};
+
+/**
+ * @description sends notifications to customer when offer is made
+ * @param {[string]} fcms user fcms
+ */
+export const newOrderOfferNotification = async (args: any) => {
+  const { fcms, type, order } = args;
+  const title = "New Order Offer";
+  const body = "There is a new offer for your order.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+};
+
+/**
+ * @description sends notifications to chucker when offer is accepted
+ * @param {[string]} fcms user fcms
+ * @param {string} chucker id of chucker
+ * @param {string} order id of order
+ * @param {string} customer id of customer
+ */
+export const OrderOfferAcceptedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Offer Accepted";
+  const body = "Your request for order is accepted.";
+
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+
+  await notificationsModel.create({
+    type,
+    text: body,
+    user: chucker,
+    customer,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to customer started order
+ * @param {[string]} fcms user fcms
+ * @param {string} chucker id of chucker
+ * @param {string} order id of order
+ * @param {string} customer id of customer
+ */
+export const orderStartedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Started";
+  const body = "Chucker has started your order.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+
+  await notificationsModel.create({
+    type,
+    text: body,
+    chucker,
+    user: customer,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to customer on chucker moving
+ * @param {[string]} fcms user fcms
+ */
+export const chuckerStaredMovingNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Chucker Started Moving";
+  const body = "Chucker has started moving towards your location.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+  await notificationsModel.create({
+    type,
+    text: body,
+    chucker,
+    user: customer,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to customer on chucker reaching
+ * @param {[string]} fcms user fcms
+ */
+export const chuckerReachedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Chucker Reached";
+  const body = "Chucker has reached your location.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+  await notificationsModel.create({
+    type,
+    text: body,
+    chucker,
+    user: customer,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to chucker when work is rejected
+ * @param {[string]} fcms user fcms
+ */
+export const orderWorkRejectedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Work Rejected";
+  const body = "Your order work has been rejected by customer.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+  await notificationsModel.create({
+    type,
+    text: body,
+    customer,
+    user: chucker,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to chucker when work is accepted
+ * @param {[string]} fcms user fcms
+ */
+export const orderWorkAcceptedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Work Accepted";
+  const body = "Your order work has been accepted by customer.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+  await notificationsModel.create({
+    type,
+    text: body,
+    customer,
+    user: chucker,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to customer on pre work submission
+ * @param {[string]} fcms user fcms
+ */
+export const orderPreWorkSubmittedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Pre Work Submitted";
+  const body = "Your before work order pictures have been submitted by chucker.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+  await notificationsModel.create({
+    type,
+    text: body,
+    chucker,
+    user: customer,
+    order,
+  });
+};
+/**
+ * @description sends notifications to customer on work submission
+ * @param {[string]} fcms user fcms
+ */
+export const orderWorkSubmittedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Work Submitted";
+  const body = "Your order work has been submitted by chucker.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+  await notificationsModel.create({
+    type,
+    text: body,
+    chucker,
+    user: customer,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to chucker completed order
+ * @param {[string]} fcms user fcms
+ * @param {string} chucker id of chucker
+ * @param {string} order id of order
+ * @param {string} customer id of customer
+ */
+export const orderCompletedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Completed";
+  const body = "Customer has completed your order.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+
+  await notificationsModel.create({
+    type,
+    text: body,
+    customer,
+    user: chucker,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to chucker cancelled order
+ * @param {[string]} fcms user fcms
+ * @param {string} chucker id of chucker
+ * @param {string} order id of order
+ * @param {string} customer id of customer
+ */
+export const orderCancelledNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Cancelled";
+  const body = "Order has been cancelled.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+
+  await notificationsModel.create({
+    type,
+    text: body,
+    customer,
+    user: chucker,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to customer extra charges requested
+ * @param {[string]} fcms user fcms
+ * @param {string} chucker id of chucker
+ * @param {string} order id of order
+ * @param {string} customer id of customer
+ */
+export const extraChargesRequestedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Extra Charges Request";
+  const body = "Chucker has requested extra charges.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+
+  await notificationsModel.create({
+    type,
+    text: body,
+    chucker,
+    user: customer,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to chucker extra charges approved
+ * @param {[string]} fcms user fcms
+ * @param {string} chucker id of chucker
+ * @param {string} order id of order
+ * @param {string} customer id of customer
+ */
+export const extraChargesApprovedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Extra Charges Approved";
+  const body = "Customer has approved extra charges.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+
+  await notificationsModel.create({
+    type,
+    text: body,
+    customer,
+    user: chucker,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to chucker extra charges rejected
+ * @param {[string]} fcms user fcms
+ * @param {string} chucker id of chucker
+ * @param {string} order id of order
+ * @param {string} customer id of customer
+ */
+export const extraChargesRejectedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Extra Charges Rejected";
+  const body = "Customer has rejected extra charges.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+
+  await notificationsModel.create({
+    type,
+    text: body,
+    customer,
+    user: chucker,
+    order,
+  });
+};
+
+/**
+ * @description sends notifications to chucker on review submission
+ * @param {[string]} fcms user fcms
+ */
+export const orderReviewSubmittedNotification = async (args: any) => {
+  const { fcms, chucker, customer, order, type } = args;
+  const title = "Order Review Submitted";
+  const body = "Order review has been submitted by customer.";
+  await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type, order: order.toString() },
+  });
+  await notificationsModel.create({
+    type,
+    text: body,
+    customer,
+    user: chucker,
+    order,
+  });
+};
+
+/**
+ * @description sends custom notifications
+ * @param {[string]} fcms user fcms
+ */
+export const customNotification = async (args: any) => {
+  const { fcms, title, body } = args;
+
+  return await new FirebaseManager().notify({
+    fcms,
+    title,
+    body,
+    data: { type: CUSTOM },
   });
 };

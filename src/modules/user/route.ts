@@ -134,14 +134,14 @@ router
       const { _id: user } = req.user;
       const { page, limit } = req.query;
       const args = { user, limit: Number(limit), page: Number(page) };
-      const response = await notificationController.getElements(args);
+      const response = await notificationController.getAllNotifications(args);
       res.json(response);
     }),
   )
   .patch(
     exceptionHandler(async (req: IRequest, res: Response) => {
       const { _id: user } = req.user;
-      await notificationController.readNotifications(user);
+      await notificationController.getAllNotifications(user);
       res.json({ message: "Operation completed successfully!" });
     }),
   );

@@ -5,9 +5,9 @@ import { isValidObjectId, Types } from "mongoose";
 import ElementModel from "./model";
 import * as conversationController from "../conversation/controller";
 import * as userController from "../user/controller";
+import * as notificationController from "../notification/controller";
 import { Element } from "./interface";
 import { GetMessagesDTO, SendMessageDTO } from "./dto";
-import { sendNewMessageNotification } from "../notification/controller";
 import { MongoID } from "../../configs/types";
 import { MESSAGE_STATUSES } from "../../configs/enum";
 import { ErrorHandler } from "../../middlewares/error-handler";
@@ -33,16 +33,14 @@ export const addElement = async (elementObj: Element) => {
  */
 export const updateElementById = async (
   element: MongoID,
-  elementObj: Partial<Element>
+  elementObj: Partial<Element>,
 ) => {
   if (!element) throw new ErrorHandler("Please enter element id!", 400);
   if (!isValidObjectId(element))
     throw new ErrorHandler("Please enter valid element id!", 400);
-  const elementExists = await ElementModel.findByIdAndUpdate(
-    element,
-    elementObj,
-    { new: true }
-  );
+  const elementExists = await ElementModel.findByIdAndUpdate(element, elementObj, {
+    new: true,
+  });
   if (!elementExists) throw new ErrorHandler("element not found!", 404);
   return elementExists;
 };
@@ -60,9 +58,7 @@ export const getElements = async (params: GetMessagesDTO) => {
   const query: any = {};
   if (conversation)
     query.conversation =
-      typeof conversation === "string"
-        ? new ObjectId(conversation)
-        : conversation;
+      typeof conversation === "string" ? new ObjectId(conversation) : conversation;
   else if (user1 && user2) {
     if (typeof user1 === "string") user1 = new ObjectId(user1);
     if (typeof user2 === "string") user2 = new ObjectId(user2);
@@ -125,7 +121,7 @@ export const send = async (params: SendMessageDTO) => {
     messageData: message,
     conversationData: conversation,
   };
-  await sendNewMessageNotification(args);
+  await notificationController.newMessageNotification(args);
 
   return message;
 };
@@ -140,8 +136,7 @@ export const readMessages = async (params: Partial<Element>): Promise<void> => {
   if (!userTo) throw new ErrorHandler("Please enter userTo id!", 400);
   if (!(await userController.checkElementExistence({ _id: userTo })))
     throw new ErrorHandler("Please enter valid userTo id!", 400);
-  if (!conversation)
-    throw new ErrorHandler("Please enter conversation id!", 400);
+  if (!conversation) throw new ErrorHandler("Please enter conversation id!", 400);
   if (!(await conversationController.getElementById(conversation)))
     throw new ErrorHandler("Please enter valid conversation id!", 400);
   await ElementModel.updateMany({ conversation, userTo }, messageObj);

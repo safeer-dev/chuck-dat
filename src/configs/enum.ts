@@ -96,6 +96,7 @@ export enum PROFILE_STATUS {
 }
 
 export enum NOTIFICATION_TYPES {
+  CUSTOM = "custom",
   NEW_MESSAGE = "new_message",
   NEW_ORDER_REQUEST = "new_order_request",
   NEW_ORDER_OFFER = "new_order_offer",
