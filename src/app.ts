@@ -11,7 +11,8 @@ import mongoose from "mongoose";
 import "./bin/www";
 import indexRouter from "./routes";
 import SocketManager from "./utils/socket-manager";
-import errorHandler, { ErrorHandler } from "./middlewares/error-handler";
+import errorHandler from "./middlewares/error-handler";
+import error from "./middlewares/error-handler";
 
 // destructuring assignments
 const { NODE_ENV, MONGO_URI, PORT } = process.env;
@@ -29,7 +30,7 @@ const serverFunction = async () => {
       cors({
         origin: ["http://localhost:3000", "https://admin.app.com"],
         credentials: true,
-      })
+      }),
     );
 
     new SocketManager().initializeSocket({ server, app });
@@ -46,7 +47,7 @@ const serverFunction = async () => {
       },
       (err) => {
         console.log(err);
-      }
+      },
     );
 
     app.use(logger("dev"));
@@ -66,7 +67,7 @@ const serverFunction = async () => {
 
     // catch 404 and forward to error handler
     app.use(function (_req: Request, _res: Response, next: NextFunction) {
-      next(new ErrorHandler("Not Found", 404));
+      next(new Error("Not Found|||404"));
     });
 
     // error handler
@@ -77,6 +78,4 @@ const serverFunction = async () => {
 };
 
 serverFunction();
-console.log(
-  chalk.hex("#607070")(chalk.underline(NODE_ENV || "".toUpperCase()))
-);
+console.log(chalk.hex("#607070")(chalk.underline(NODE_ENV || "".toUpperCase())));

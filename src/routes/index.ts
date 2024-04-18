@@ -22,18 +22,18 @@ const { POSTMAN_URL } = process.env;
 // variable initializations
 const router = express.Router();
 
-router.use("/admin", admin);
+router.use("/admins", admin);
 router.use("/auth", auth);
-router.use("/element", element);
-router.use("/message", message);
-router.use("/user", user);
-router.use("/service", service);
-router.use("/sub-service", subService);
-router.use("/service-request", serviceRequest);
+router.use("/elements", element);
+router.use("/messages", message);
+router.use("/users", user);
+router.use("/services", service);
+router.use("/sub-services", subService);
+router.use("/service-requests", serviceRequest);
 router.use("/service-offers", serviceOffers);
 router.use("/service-orders", serviceOrders);
-router.use("/chucker", chucker);
-router.use("/customer-location", customerLocation);
+router.use("/chuckers", chucker);
+router.use("/customer-locations", customerLocation);
 router.use("/docs", (_req: Request, res: Response) => res.redirect(POSTMAN_URL || ""));
 
 export default router;

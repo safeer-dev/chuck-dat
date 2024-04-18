@@ -3,4 +3,7 @@ export type GetElementsDTO = {
   page: number;
   keyword?: string;
   chucker?: any;
+  chuckerLocation: any;
+  chuckerServiceRadius: any;
+  chuckerZipcodes: any;
 };

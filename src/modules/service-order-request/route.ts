@@ -13,23 +13,23 @@ import { IRequest } from "../../configs/types";
 // variable initializations
 const router = express.Router();
 
-router.get(
-  "/",
-  verifyToken,
-  verifyUser,
-  exceptionHandler(async (req: Request, res: Response) => {
-    const { page, limit } = req.query;
-    let { keyword } = req.query;
-    keyword = keyword?.toString() || "";
-    const args = {
-      keyword,
-      limit: Number(limit),
-      page: Number(page),
-    };
-    const response = await elementController.getElements(args);
-    res.json(response);
-  }),
-);
+// router.get(
+//   "/",
+//   verifyToken,
+//   verifyUser,
+//   exceptionHandler(async (req: Request, res: Response) => {
+//     const { page, limit } = req.query;
+//     let { keyword } = req.query;
+//     keyword = keyword?.toString() || "";
+//     const args = {
+//       keyword,
+//       limit: Number(limit),
+//       page: Number(page),
+//     };
+//     const response = await elementController.getElements(args);
+//     res.json(response);
+//   }),
+// );
 
 router
   .route("/customer")
@@ -68,20 +68,20 @@ router
       res.json(response);
     }),
   )
-  .get(
-    exceptionHandler(async (req: Request, res: Response) => {
-      const { page, limit } = req.query;
-      let { keyword } = req.query;
-      keyword = keyword?.toString() || "";
-      const args = {
-        keyword,
-        limit: Number(limit),
-        page: Number(page),
-      };
-      const response = await elementController.getElements(args);
-      res.json(response);
-    }),
-  )
+  // .get(
+  //   exceptionHandler(async (req: Request, res: Response) => {
+  //     const { page, limit } = req.query;
+  //     let { keyword } = req.query;
+  //     keyword = keyword?.toString() || "";
+  //     const args = {
+  //       keyword,
+  //       limit: Number(limit),
+  //       page: Number(page),
+  //     };
+  //     const response = await elementController.getElements(args);
+  //     res.json(response);
+  //   }),
+  // )
   .delete(
     exceptionHandler(async (req: Request, res: Response) => {
       let { element } = req.query;
@@ -108,10 +108,14 @@ router.get(
   verifyToken,
   verifyUser,
   exceptionHandler(async (req: IRequest, res: Response) => {
-    const { page, limit } = req.query;
+    const { page, limit, chuckerLocation, chuckerServiceRadius, chuckerZipcodes } =
+      req.query;
     const chucker = req.user._id;
     const args = {
       chucker,
+      chuckerLocation,
+      chuckerServiceRadius,
+      chuckerZipcodes,
       limit: Number(limit),
       page: Number(page),
     };

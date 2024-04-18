@@ -83,6 +83,10 @@ export const deleteElement = async (query: Partial<Element>) => {
   return elementExists;
 };
 
+export const getChuckers = async () => {
+  const elements = await ElementModel.find();
+  return elements;
+};
 /**
  * @description Get element
  * @param {String} element element id

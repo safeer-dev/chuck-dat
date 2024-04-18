@@ -3,6 +3,7 @@ import mongoose, { isValidObjectId } from "mongoose";
 
 // file imports
 import ElementModel from "./model";
+import * as chuckerController from "../chucker/controller";
 import { Element } from "./interface";
 import { GetElementsDTO } from "./dto";
 
@@ -284,11 +285,24 @@ export const getElements = async (params: GetElementsDTO) => {
 //  };
 
 export const getOrderRequests = async (params: GetElementsDTO) => {
-  let { limit, page, chucker } = params;
+  let { limit, page, chucker, chuckerLocation, chuckerServiceRadius, chuckerZipcodes } =
+    params;
   page = page - 1 || 0;
   limit = limit || 10;
-
   const result = await ElementModel.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: chuckerLocation?.coordinates || [0, 0],
+        },
+        distanceField: "distance",
+        maxDistance: chuckerServiceRadius,
+        // query: { status: PENDING },
+        // includeLocs: "dist.location",
+        // spherical: true,
+      },
+    },
     {
       $match: {
         decliners: { $nin: [new mongoose.Types.ObjectId(chucker)] },
@@ -366,23 +380,17 @@ export const getOrderRequest = async (params: any) => {
   const result = await ElementModel.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(requestId), // Match documents based on the provided ID
+        _id: new mongoose.Types.ObjectId(requestId),
       },
     },
     {
-      $addFields: {
-        declined: {
-          $cond: {
-            if: { $isArray: "$decliners" }, // Check if decliners field is an array
-            then: { $in: [new mongoose.Types.ObjectId(chucker), "$decliners"] },
-            else: false,
-          },
-        },
+      $match: {
+        decliners: { $nin: [new mongoose.Types.ObjectId(chucker)] },
       },
     },
   ]);
 
-  return result; // Return the result containing the order request(s)
+  return result;
 };
 
 /**

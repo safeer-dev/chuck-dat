@@ -43,16 +43,16 @@ const serviceProviderSchema = new Schema(
       select: false,
       // required: true,
     },
-    ServiceZipCodes: [
+    serviceZipCodes: [
       {
         type: String,
         trim: true,
       },
     ],
-    ServiceRadius: {
+    serviceRadius: {
       type: Number,
     },
-    Servicelocation: {
+    servicelocation: {
       type: {
         type: String,
 
